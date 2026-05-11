@@ -5,18 +5,55 @@
   line-height: 1.5;
   font-weight: 400;
 
+  /* Dark Mode (Default) */
+  --background: #0b1326;
+  --surface: #171f33;
+  --surface-variant: #222a3d;
+  --surface-low: #131b2e;
+  --primary: #10b981;
+  --primary-bright: #4edea3;
+  --on-primary: #003824;
+  --on-surface: #dae2fd;
+  --on-surface-variant: #86948a;
+  --outline: #3c4a42;
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --secondary: #c2c4e3;
+  --tertiary: #ffb3af;
+
   color-scheme: dark;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root.light {
+  /* Light Mode */
+  --background: #eff1f5;
+  --surface: #ffffff;
+  --surface-variant: #e6e9ef;
+  --surface-low: #ccd0da;
+  --primary: #10b981;
+  --primary-bright: #059669;
+  --on-primary: #ffffff;
+  --on-surface: #4c4f69;
+  --on-surface-variant: #7c7f93;
+  --outline: #bcc0cc;
+  --error: #d20f39;
+  --on-error: #ffffff;
+  --secondary: #7287fd;
+  --tertiary: #e64553;
+
+  color-scheme: light;
+}
 
 body {
   margin: 0;
   padding: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #0b1326; /* Match the design system background */
+  background-color: var(--background);
+  color: var(--on-surface);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #app {
@@ -24,3 +61,12 @@ body {
   min-height: 100vh;
 }
 
+/* Helper classes to use the variables */
+.bg-theme-background { background-color: var(--background); }
+.bg-theme-surface { background-color: var(--surface); }
+.bg-theme-surface-variant { background-color: var(--surface-variant); }
+.bg-theme-surface-low { background-color: var(--surface-low); }
+.text-theme-on-surface { color: var(--on-surface); }
+.text-theme-on-surface-variant { color: var(--on-surface-variant); }
+.border-theme-outline { border-color: var(--outline); }
+.text-theme-primary { color: var(--primary-bright); }
