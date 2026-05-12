@@ -45,6 +45,7 @@ def create_techstack(db: Session, techstack_data: TechStackCreate) -> TechStack:
     new_techstack = TechStack(
         name=techstack_data.name,
         category=techstack_data.category,
+        logo_url=techstack_data.logo_url,
         sort_order=techstack_data.sort_order,
     )
     db.add(new_techstack)

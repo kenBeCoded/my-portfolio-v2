@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import AdminLayout from '../components/AdminLayout.vue'
 
 const projects = [
@@ -13,6 +14,33 @@ const statusStyle: Record<string, string> = {
   STAGING:    'text-[#c2c4e3] border-[#c2c4e3]/20 bg-[#42455f]/30',
   DEPRECATED: 'text-[#ffb3af] border-[#ffb3af]/20 bg-[#fc7c78]/10',
 }
+
+// ── Dialog state ─────────────────────────────────────────────
+const showNewProjectDialog = ref(false)
+const newProjectForm = ref({
+  title: '',
+  description: '',
+  repo_url: '',
+  live_url: '',
+  status: 'pending',
+  sort_order: 0,
+  featured: false,
+})
+
+function openNewProjectDialog() {
+  newProjectForm.value = { title: '', description: '', repo_url: '', live_url: '', status: 'pending', sort_order: 0, featured: false }
+  showNewProjectDialog.value = true
+}
+
+function closeNewProjectDialog() {
+  showNewProjectDialog.value = false
+}
+
+function submitNewProject() {
+  // TODO: wire up to API
+  console.log('New project:', newProjectForm.value)
+  closeNewProjectDialog()
+}
 </script>
 
 <template>
@@ -25,7 +53,11 @@ const statusStyle: Record<string, string> = {
           <h2 class="text-[11px] font-semibold tracking-widest uppercase text-[var(--on-surface)]" style="font-family:'JetBrains Mono',monospace;">// REPOSITORY_INDEX</h2>
           <p class="text-[12px] text-[var(--on-surface-variant)] mt-1" style="font-family:'JetBrains Mono',monospace;">TOTAL_COUNT: 0{{ projects.length }}_PROJECTS</p>
         </div>
-        <button class="flex items-center gap-2 bg-[var(--primary)] text-[var(--on-primary)] font-semibold tracking-widest uppercase text-[11px] px-4 py-2 hover:bg-[var(--primary-bright)] transition-colors" style="font-family:'JetBrains Mono',monospace;">
+        <button
+          @click="openNewProjectDialog"
+          class="flex items-center gap-2 bg-[var(--primary)] text-[var(--on-primary)] font-semibold tracking-widest uppercase text-[11px] px-4 py-2 hover:bg-[var(--primary-bright)] transition-colors"
+          style="font-family:'JetBrains Mono',monospace;"
+        >
           <span class="material-symbols-outlined text-[18px]">add</span>
           NEW_PROJECT
         </button>
@@ -90,5 +122,172 @@ const statusStyle: Record<string, string> = {
       </div>
 
     </div>
+
+    <!-- ── New Project Dialog ──────────────────────────────── -->
+    <Teleport to="body">
+      <Transition name="dialog-fade">
+        <div
+          v-if="showNewProjectDialog"
+          class="fixed inset-0 z-50 flex items-center justify-center"
+          @click.self="closeNewProjectDialog"
+        >
+          <!-- Backdrop -->
+          <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+
+          <!-- Panel -->
+          <div class="relative z-10 w-full max-w-lg bg-[var(--surface)] border border-[var(--outline)] shadow-2xl max-h-[90vh] flex flex-col">
+
+            <!-- Dialog header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--outline)] bg-[var(--surface-variant)]/30 shrink-0">
+              <div>
+                <p class="text-[10px] font-semibold tracking-widest uppercase text-[var(--primary-bright)]" style="font-family:'JetBrains Mono',monospace;">// NEW_PROJECT</p>
+                <h3 class="text-[var(--on-surface)] font-bold text-sm mt-0.5" style="font-family:'JetBrains Mono',monospace;">Register New Project</h3>
+              </div>
+              <button
+                @click="closeNewProjectDialog"
+                class="text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] transition-colors"
+              >
+                <span class="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+
+            <!-- Dialog body -->
+            <form @submit.prevent="submitNewProject" class="p-6 space-y-4 overflow-y-auto">
+
+              <!-- Title -->
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">TITLE</label>
+                <input
+                  v-model="newProjectForm.title"
+                  type="text"
+                  required
+                  placeholder="e.g. My Awesome Project"
+                  class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors placeholder-[var(--outline)]"
+                  style="font-family:'JetBrains Mono',monospace;"
+                />
+              </div>
+
+              <!-- Description -->
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">DESCRIPTION</label>
+                <textarea
+                  v-model="newProjectForm.description"
+                  rows="3"
+                  placeholder="Brief project description..."
+                  class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors placeholder-[var(--outline)] resize-none"
+                  style="font-family:'JetBrains Mono',monospace;"
+                ></textarea>
+              </div>
+
+              <!-- Repo URL -->
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">REPO URL</label>
+                <input
+                  v-model="newProjectForm.repo_url"
+                  type="url"
+                  placeholder="https://github.com/..."
+                  class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors placeholder-[var(--outline)]"
+                  style="font-family:'JetBrains Mono',monospace;"
+                />
+              </div>
+
+              <!-- Live URL -->
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">LIVE URL</label>
+                <input
+                  v-model="newProjectForm.live_url"
+                  type="url"
+                  placeholder="https://myproject.io"
+                  class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors placeholder-[var(--outline)]"
+                  style="font-family:'JetBrains Mono',monospace;"
+                />
+              </div>
+
+              <!-- Status + Sort Order (row) -->
+              <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                  <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">STATUS</label>
+                  <select
+                    v-model="newProjectForm.status"
+                    class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors"
+                    style="font-family:'JetBrains Mono',monospace;"
+                  >
+                    <option value="pending">PENDING</option>
+                    <option value="in-progress">IN_PROGRESS</option>
+                    <option value="done">DONE</option>
+                  </select>
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">SORT ORDER</label>
+                  <input
+                    v-model.number="newProjectForm.sort_order"
+                    type="number"
+                    min="0"
+                    class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors"
+                    style="font-family:'JetBrains Mono',monospace;"
+                  />
+                </div>
+              </div>
+
+              <!-- Featured checkbox -->
+              <div class="flex items-center gap-3 pt-1">
+                <div
+                  @click="newProjectForm.featured = !newProjectForm.featured"
+                  :class="[
+                    'w-5 h-5 border flex items-center justify-center cursor-pointer transition-colors shrink-0',
+                    newProjectForm.featured
+                      ? 'bg-[var(--primary)] border-[var(--primary)]'
+                      : 'bg-[var(--background)] border-[var(--outline)]'
+                  ]"
+                >
+                  <span v-if="newProjectForm.featured" class="material-symbols-outlined text-[var(--on-primary)] text-[14px]">check</span>
+                </div>
+                <label
+                  @click="newProjectForm.featured = !newProjectForm.featured"
+                  class="text-[11px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)] cursor-pointer select-none"
+                  style="font-family:'JetBrains Mono',monospace;"
+                >MARK AS FEATURED</label>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  @click="closeNewProjectDialog"
+                  class="px-4 py-2 border border-[var(--outline)] text-[var(--on-surface-variant)] text-[11px] font-semibold tracking-widest uppercase hover:bg-[var(--surface-variant)] transition-colors"
+                  style="font-family:'JetBrains Mono',monospace;"
+                >CANCEL</button>
+                <button
+                  type="submit"
+                  class="px-4 py-2 bg-[var(--primary)] text-[var(--on-primary)] text-[11px] font-semibold tracking-widest uppercase hover:bg-[var(--primary-bright)] transition-colors"
+                  style="font-family:'JetBrains Mono',monospace;"
+                >CREATE_PROJECT</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
   </AdminLayout>
 </template>
+
+<style scoped>
+.dialog-fade-enter-active,
+.dialog-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.dialog-fade-enter-from,
+.dialog-fade-leave-to {
+  opacity: 0;
+}
+.dialog-fade-enter-active .relative,
+.dialog-fade-leave-active .relative {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.dialog-fade-enter-from .relative,
+.dialog-fade-leave-to .relative {
+  transform: translateY(-12px);
+  opacity: 0;
+}
+</style>

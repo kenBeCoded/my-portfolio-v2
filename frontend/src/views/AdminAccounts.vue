@@ -24,6 +24,25 @@ const filtered = computed(() =>
     a.fullname.toLowerCase().includes(search.value.toLowerCase())
   )
 )
+
+// ── Dialog state ─────────────────────────────────────────────
+const showCreateDialog = ref(false)
+const createForm = ref({ username: '', password: '', fullname: '', role: 'user' })
+
+function openCreateDialog() {
+  createForm.value = { username: '', password: '', fullname: '', role: 'user' }
+  showCreateDialog.value = true
+}
+
+function closeCreateDialog() {
+  showCreateDialog.value = false
+}
+
+function submitCreateUser() {
+  // TODO: wire up to API
+  console.log('Create user:', createForm.value)
+  closeCreateDialog()
+}
 </script>
 
 <template>
@@ -49,7 +68,11 @@ const filtered = computed(() =>
             />
           </div>
           <!-- Create -->
-          <button class="flex items-center gap-2 bg-[var(--primary)] text-[var(--on-primary)] font-semibold tracking-widest uppercase text-[11px] px-4 py-2 hover:bg-[var(--primary-bright)] transition-colors whitespace-nowrap" style="font-family:'JetBrains Mono',monospace;">
+          <button
+            @click="openCreateDialog"
+            class="flex items-center gap-2 bg-[var(--primary)] text-[var(--on-primary)] font-semibold tracking-widest uppercase text-[11px] px-4 py-2 hover:bg-[var(--primary-bright)] transition-colors whitespace-nowrap"
+            style="font-family:'JetBrains Mono',monospace;"
+          >
             <span class="material-symbols-outlined text-[18px]">person_add</span> CREATE_NEW
           </button>
         </div>
@@ -105,5 +128,129 @@ const filtered = computed(() =>
       </div>
 
     </section>
+
+    <!-- ── Create User Dialog ──────────────────────────────── -->
+    <Teleport to="body">
+      <Transition name="dialog-fade">
+        <div
+          v-if="showCreateDialog"
+          class="fixed inset-0 z-50 flex items-center justify-center"
+          @click.self="closeCreateDialog"
+        >
+          <!-- Backdrop -->
+          <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+
+          <!-- Panel -->
+          <div class="relative z-10 w-full max-w-md bg-[var(--surface)] border border-[var(--outline)] shadow-2xl">
+
+            <!-- Dialog header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--outline)] bg-[var(--surface-variant)]/30">
+              <div>
+                <p class="text-[10px] font-semibold tracking-widest uppercase text-[var(--primary-bright)]" style="font-family:'JetBrains Mono',monospace;">// CREATE_NEW_ACCOUNT</p>
+                <h3 class="text-[var(--on-surface)] font-bold text-sm mt-0.5" style="font-family:'JetBrains Mono',monospace;">Register System User</h3>
+              </div>
+              <button
+                @click="closeCreateDialog"
+                class="text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] transition-colors"
+              >
+                <span class="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+
+            <!-- Dialog body -->
+            <form @submit.prevent="submitCreateUser" class="p-6 space-y-4">
+
+              <!-- Username -->
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">USERNAME</label>
+                <input
+                  v-model="createForm.username"
+                  type="text"
+                  required
+                  placeholder="e.g. dev_user_01"
+                  class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors placeholder-[var(--outline)]"
+                  style="font-family:'JetBrains Mono',monospace;"
+                />
+              </div>
+
+              <!-- Password -->
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">PASSWORD</label>
+                <input
+                  v-model="createForm.password"
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors placeholder-[var(--outline)]"
+                  style="font-family:'JetBrains Mono',monospace;"
+                />
+              </div>
+
+              <!-- Fullname -->
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">FULL NAME</label>
+                <input
+                  v-model="createForm.fullname"
+                  type="text"
+                  required
+                  placeholder="e.g. John Doe"
+                  class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors placeholder-[var(--outline)]"
+                  style="font-family:'JetBrains Mono',monospace;"
+                />
+              </div>
+
+              <!-- Role -->
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">ROLE</label>
+                <select
+                  v-model="createForm.role"
+                  class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors"
+                  style="font-family:'JetBrains Mono',monospace;"
+                >
+                  <option value="user">USER</option>
+                  <option value="admin">ADMIN</option>
+                </select>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  @click="closeCreateDialog"
+                  class="px-4 py-2 border border-[var(--outline)] text-[var(--on-surface-variant)] text-[11px] font-semibold tracking-widest uppercase hover:bg-[var(--surface-variant)] transition-colors"
+                  style="font-family:'JetBrains Mono',monospace;"
+                >CANCEL</button>
+                <button
+                  type="submit"
+                  class="px-4 py-2 bg-[var(--primary)] text-[var(--on-primary)] text-[11px] font-semibold tracking-widest uppercase hover:bg-[var(--primary-bright)] transition-colors"
+                  style="font-family:'JetBrains Mono',monospace;"
+                >CREATE_USER</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
   </AdminLayout>
 </template>
+
+<style scoped>
+.dialog-fade-enter-active,
+.dialog-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.dialog-fade-enter-from,
+.dialog-fade-leave-to {
+  opacity: 0;
+}
+.dialog-fade-enter-active .relative,
+.dialog-fade-leave-active .relative {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.dialog-fade-enter-from .relative,
+.dialog-fade-leave-to .relative {
+  transform: translateY(-12px);
+  opacity: 0;
+}
+</style>
