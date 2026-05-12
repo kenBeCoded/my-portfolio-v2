@@ -19,6 +19,7 @@ class ProjectCreate(BaseModel):
     status: str = Field(default="in-progress", max_length=20)
     sort_order: int = 0
     featured: bool = False
+    techstack_ids: list[int] = Field(default_factory=list, description="IDs of techstacks to assign")
 
 
 class ProjectUpdate(BaseModel):
@@ -30,6 +31,7 @@ class ProjectUpdate(BaseModel):
     status: str | None = Field(default=None, max_length=20)
     sort_order: int | None = None
     featured: bool | None = None
+    techstack_ids: list[int] | None = Field(default=None, description="Replace techstack associations (None = no change)")
 
 
 class ProjectTechStackUpdate(BaseModel):

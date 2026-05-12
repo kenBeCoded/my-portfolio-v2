@@ -15,8 +15,21 @@ const statusStyle: Record<string, string> = {
   DEPRECATED: 'text-[#ffb3af] border-[#ffb3af]/20 bg-[#fc7c78]/10',
 }
 
+// ── Available techstacks (replace with API data) ──────────────
+const availableTechstacks = [
+  { id: 1, name: 'Node.js',      category: 'RUNTIME'        },
+  { id: 2, name: 'PostgreSQL',   category: 'DATABASE'       },
+  { id: 3, name: 'Redis',        category: 'CACHE'          },
+  { id: 4, name: 'Kubernetes',   category: 'ORCHESTRATION'  },
+  { id: 5, name: 'Vue 3',        category: 'FRAMEWORK'      },
+  { id: 6, name: 'Tailwind CSS', category: 'STYLING'        },
+  { id: 7, name: 'FastAPI',      category: 'FRAMEWORK'      },
+  { id: 8, name: 'Docker',       category: 'INFRASTRUCTURE' },
+]
+
 // ── Dialog state ─────────────────────────────────────────────
 const showNewProjectDialog = ref(false)
+const selectedTechstacks = ref<number[]>([])
 const newProjectForm = ref({
   title: '',
   description: '',
@@ -27,8 +40,15 @@ const newProjectForm = ref({
   featured: false,
 })
 
+function toggleTechstack(id: number) {
+  const idx = selectedTechstacks.value.indexOf(id)
+  if (idx === -1) selectedTechstacks.value.push(id)
+  else selectedTechstacks.value.splice(idx, 1)
+}
+
 function openNewProjectDialog() {
   newProjectForm.value = { title: '', description: '', repo_url: '', live_url: '', status: 'pending', sort_order: 0, featured: false }
+  selectedTechstacks.value = []
   showNewProjectDialog.value = true
 }
 
@@ -38,7 +58,7 @@ function closeNewProjectDialog() {
 
 function submitNewProject() {
   // TODO: wire up to API
-  console.log('New project:', newProjectForm.value)
+  console.log('New project:', { ...newProjectForm.value, techstacks: selectedTechstacks.value })
   closeNewProjectDialog()
 }
 </script>
@@ -247,6 +267,32 @@ function submitNewProject() {
                   class="text-[11px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)] cursor-pointer select-none"
                   style="font-family:'JetBrains Mono',monospace;"
                 >MARK AS FEATURED</label>
+              </div>
+
+              <!-- TechStack multi-select -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">TECH STACK</label>
+                  <span class="text-[10px] tracking-widest text-[var(--primary-bright)]" style="font-family:'JetBrains Mono',monospace;">{{ selectedTechstacks.length }}_SELECTED</span>
+                </div>
+                <div class="border border-[var(--outline)] bg-[var(--background)] p-3 flex flex-wrap gap-2 min-h-[56px]">
+                  <button
+                    v-for="tech in availableTechstacks"
+                    :key="tech.id"
+                    type="button"
+                    @click="toggleTechstack(tech.id)"
+                    :class="[
+                      'flex items-center gap-1.5 px-2.5 py-1 border text-[10px] font-semibold tracking-widest uppercase transition-all select-none',
+                      selectedTechstacks.includes(tech.id)
+                        ? 'bg-[var(--primary)] border-[var(--primary)] text-[var(--on-primary)]'
+                        : 'bg-transparent border-[var(--outline)] text-[var(--on-surface-variant)] hover:border-[var(--primary-bright)] hover:text-[var(--primary-bright)]'
+                    ]"
+                    style="font-family:'JetBrains Mono',monospace;"
+                  >
+                    <span v-if="selectedTechstacks.includes(tech.id)" class="material-symbols-outlined text-[12px]">check</span>
+                    {{ tech.name }}
+                  </button>
+                </div>
               </div>
 
               <!-- Actions -->

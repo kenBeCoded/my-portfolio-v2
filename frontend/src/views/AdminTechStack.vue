@@ -39,7 +39,7 @@ const filtered = computed(() =>
   })
 )
 
-// ── Dialog state ─────────────────────────────────────────────
+// ── Register dialog ───────────────────────────────────────────
 const showRegisterDialog = ref(false)
 const registerForm = ref({ name: '', category: '', logo_url: '', sort_order: 0 })
 
@@ -56,6 +56,31 @@ function submitRegister() {
   // TODO: wire up to API
   console.log('Register tech:', registerForm.value)
   closeRegisterDialog()
+}
+
+// ── Manage dialog ───────────────────────────────────────────
+const showManageTechDialog = ref(false)
+const manageTechForm = ref({ id: '', name: '', category: '', logo_url: '', sort_order: 0 })
+
+function openManageTechDialog(t: typeof techStack[number]) {
+  manageTechForm.value = { id: t.id, name: t.name, category: t.category, logo_url: '', sort_order: 0 }
+  showManageTechDialog.value = true
+}
+
+function closeManageTechDialog() {
+  showManageTechDialog.value = false
+}
+
+function submitManageTech() {
+  // TODO: wire up to API (PUT)
+  console.log('Update tech:', manageTechForm.value)
+  closeManageTechDialog()
+}
+
+function deleteTech() {
+  // TODO: wire up to API (DELETE)
+  console.log('Delete tech:', manageTechForm.value.id)
+  closeManageTechDialog()
 }
 </script>
 
@@ -147,7 +172,7 @@ function submitRegister() {
                 <td class="px-6 py-4">{{ t.created }}</td>
                 <td class="px-6 py-4">{{ t.updated }}</td>
                 <td class="px-6 py-4 text-right">
-                  <button class="text-[var(--primary-bright)] hover:underline font-semibold tracking-widest uppercase text-[10px]" style="font-family:'JetBrains Mono',monospace;">MANAGE</button>
+                  <button @click="openManageTechDialog(t)" class="text-[var(--primary-bright)] hover:underline font-semibold tracking-widest uppercase text-[10px]" style="font-family:'JetBrains Mono',monospace;">MANAGE</button>
                 </td>
               </tr>
             </tbody>
@@ -164,6 +189,77 @@ function submitRegister() {
       </section>
 
     </div>
+
+    <!-- ── Manage TechStack Dialog ─────────────────────────── -->
+    <Teleport to="body">
+      <Transition name="dialog-fade">
+        <div
+          v-if="showManageTechDialog"
+          class="fixed inset-0 z-50 flex items-center justify-center"
+          @click.self="closeManageTechDialog"
+        >
+          <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+          <div class="relative z-10 w-full max-w-md bg-[var(--surface)] border border-[var(--outline)] shadow-2xl">
+
+            <!-- Dialog header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--outline)] bg-[var(--surface-variant)]/30">
+              <div>
+                <p class="text-[10px] font-semibold tracking-widest uppercase text-[var(--primary-bright)]" style="font-family:'JetBrains Mono',monospace;">// MANAGE_TECH_ENTRY</p>
+                <h3 class="text-[var(--on-surface)] font-bold text-sm mt-0.5" style="font-family:'JetBrains Mono',monospace;">{{ manageTechForm.id }} — {{ manageTechForm.name }}</h3>
+              </div>
+              <button @click="closeManageTechDialog" class="text-[var(--on-surface-variant)] hover:text-[var(--on-surface)] transition-colors">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+
+            <!-- Dialog body -->
+            <form @submit.prevent="submitManageTech" class="p-6 space-y-4">
+
+              <!-- Name -->
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">NAME</label>
+                <input v-model="manageTechForm.name" type="text" required class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors" style="font-family:'JetBrains Mono',monospace;" />
+              </div>
+
+              <!-- Category -->
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">CATEGORY</label>
+                <input v-model="manageTechForm.category" type="text" required placeholder="e.g. FRAMEWORK" class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors placeholder-[var(--outline)]" style="font-family:'JetBrains Mono',monospace;" />
+              </div>
+
+              <!-- Logo URL -->
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">LOGO URL</label>
+                <input v-model="manageTechForm.logo_url" type="url" placeholder="https://cdn.example.com/logo.svg" class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors placeholder-[var(--outline)]" style="font-family:'JetBrains Mono',monospace;" />
+              </div>
+
+              <!-- Sort Order -->
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">SORT ORDER</label>
+                <input v-model.number="manageTechForm.sort_order" type="number" min="0" class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors" style="font-family:'JetBrains Mono',monospace;" />
+              </div>
+
+              <!-- Actions -->
+              <div class="flex items-center justify-between pt-2">
+                <!-- Delete -->
+                <button
+                  type="button"
+                  @click="deleteTech"
+                  class="flex items-center gap-1.5 px-4 py-2 border border-[#fc7c78]/40 text-[#fc7c78] text-[11px] font-semibold tracking-widest uppercase hover:bg-[#fc7c78]/10 transition-colors"
+                  style="font-family:'JetBrains Mono',monospace;"
+                >
+                  <span class="material-symbols-outlined text-[16px]">delete</span>DELETE
+                </button>
+                <div class="flex gap-3">
+                  <button type="button" @click="closeManageTechDialog" class="px-4 py-2 border border-[var(--outline)] text-[var(--on-surface-variant)] text-[11px] font-semibold tracking-widest uppercase hover:bg-[var(--surface-variant)] transition-colors" style="font-family:'JetBrains Mono',monospace;">CANCEL</button>
+                  <button type="submit" class="px-4 py-2 bg-[var(--primary)] text-[var(--on-primary)] text-[11px] font-semibold tracking-widest uppercase hover:bg-[var(--primary-bright)] transition-colors" style="font-family:'JetBrains Mono',monospace;">SAVE_CHANGES</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
 
     <!-- ── Register TechStack Dialog ───────────────────────── -->
     <Teleport to="body">

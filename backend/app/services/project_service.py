@@ -43,7 +43,7 @@ def get_project_by_id(db: Session, project_id: int) -> Project:
 
 
 def create_project(db: Session, project_data: ProjectCreate) -> Project:
-    """Create a new project."""
+    """Create a new project and optionally assign techstacks in one transaction."""
     new_project = Project(
         title=project_data.title,
         description=project_data.description,
@@ -54,22 +54,68 @@ def create_project(db: Session, project_data: ProjectCreate) -> Project:
         featured=project_data.featured,
     )
     db.add(new_project)
+    db.flush()  # get new_project.id without committing
+
+    # Assign techstacks if provided
+    if project_data.techstack_ids:
+        valid_techstacks = (
+            db.query(TechStack)
+            .filter(TechStack.id.in_(project_data.techstack_ids))
+            .all()
+        )
+        valid_ids = {ts.id for ts in valid_techstacks}
+        invalid_ids = set(project_data.techstack_ids) - valid_ids
+        if invalid_ids:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid techstack IDs: {sorted(invalid_ids)}",
+            )
+        for ts_id in project_data.techstack_ids:
+            db.add(ProjectTechStack(project_id=new_project.id, techstack_id=ts_id))
+
     db.commit()
     db.refresh(new_project)
     return new_project
 
 
 def update_project(db: Session, project_id: int, project_data: ProjectUpdate) -> Project:
-    """Update an existing project.
+    """Update an existing project, optionally replacing its techstack associations.
 
     Raises:
         HTTPException 404 if project not found.
+        HTTPException 400 if any supplied techstack ID is invalid.
     """
     project = get_project_by_id(db, project_id)
 
     update_fields = project_data.model_dump(exclude_unset=True)
+
+    # Handle techstack replacement separately — do not setattr on the ORM model
+    techstack_ids = update_fields.pop("techstack_ids", None)
+
     for field, value in update_fields.items():
         setattr(project, field, value)
+
+    if techstack_ids is not None:
+        # Validate supplied IDs
+        valid_techstacks = (
+            db.query(TechStack)
+            .filter(TechStack.id.in_(techstack_ids))
+            .all()
+        )
+        valid_ids = {ts.id for ts in valid_techstacks}
+        invalid_ids = set(techstack_ids) - valid_ids
+        if invalid_ids:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid techstack IDs: {sorted(invalid_ids)}",
+            )
+
+        # Remove existing associations then re-insert
+        db.query(ProjectTechStack).filter(
+            ProjectTechStack.project_id == project_id
+        ).delete(synchronize_session="fetch")
+        for ts_id in techstack_ids:
+            db.add(ProjectTechStack(project_id=project_id, techstack_id=ts_id))
 
     db.commit()
     db.refresh(project)
