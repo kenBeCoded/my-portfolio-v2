@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, provide } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { logout as apiLogout } from '../services/authService'
 
 const props = defineProps<{ pageTitle: string }>()
 
@@ -24,7 +25,8 @@ function isActive(to: string) {
   return to === '/admin' ? route.path === '/admin' : route.path.startsWith(to)
 }
 
-function logout() {
+async function logout() {
+  await apiLogout()
   router.push('/admin/login')
 }
 

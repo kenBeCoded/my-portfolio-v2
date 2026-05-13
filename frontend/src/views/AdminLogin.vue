@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
+import { login } from '../services/authService'
 
 const router = useRouter()
+const route  = useRoute()
 
 const username = ref('')
 const password = ref('')
-const error = ref('')
-const loading = ref(false)
+const error    = ref('')
+const loading  = ref(false)
 
 async function handleLogin() {
   error.value = ''
@@ -16,10 +18,15 @@ async function handleLogin() {
     return
   }
   loading.value = true
-  // Simulate auth — hook up to real backend later
-  await new Promise(r => setTimeout(r, 800))
-  loading.value = false
-  router.push('/admin')
+  try {
+    await login(username.value, password.value)
+    const redirect = (route.query.redirect as string) || '/admin'
+    router.push(redirect)
+  } catch (err: unknown) {
+    error.value = err instanceof Error ? `ERR: ${err.message}` : 'ERR: Authentication failed.'
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
