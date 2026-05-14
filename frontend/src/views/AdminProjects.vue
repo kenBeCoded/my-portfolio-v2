@@ -2,13 +2,13 @@
 import { ref, onMounted } from 'vue'
 import AdminLayout from '../components/AdminLayout.vue'
 import { fetchTechStacks, type TechStackOut } from '../services/techStackService'
-
-const projects = [
-  { title: 'Quantum-Engine',      repo: 'github.com/org/q-engine',   live: 'q-engine.io',         status: 'PRODUCTION', featured: true  },
-  { title: 'Neural-API-v2',       repo: 'github.com/org/neural-v2',  live: null,                  status: 'STAGING',    featured: false },
-  { title: 'Data-Viz-Dashboard',  repo: 'github.com/org/dataviz',    live: 'analytics.main.net',  status: 'PRODUCTION', featured: true  },
-  { title: 'Auth-Refactor',       repo: 'github.com/org/auth-ref',   live: null,                  status: 'DEPRECATED', featured: false },
-]
+import {
+  fetchProjects,
+  createProject,
+  updateProject,
+  deleteProjectApi,
+  type ProjectOut
+} from '../services/projectService'
 
 const statusStyle: Record<string, string> = {
   PRODUCTION: 'text-[#4edea3] border-[#4edea3]/20 bg-[#4edea3]/10',
@@ -16,18 +16,31 @@ const statusStyle: Record<string, string> = {
   DEPRECATED: 'text-[#ffb3af] border-[#ffb3af]/20 bg-[#fc7c78]/10',
 }
 
-// ── Available techstacks (from API) ──────────────────────────
+// ── State (from API) ─────────────────────────────────────────
 const availableTechstacks = ref<TechStackOut[]>([])
 const isLoadingTechstacks = ref(false)
 
+const projects = ref<ProjectOut[]>([])
+const isLoadingProjects = ref(true)
+const projectsApiError = ref('')
+
 onMounted(async () => {
   isLoadingTechstacks.value = true
+  isLoadingProjects.value = true
+  projectsApiError.value = ''
   try {
-    availableTechstacks.value = await fetchTechStacks()
+    const [techData, projData] = await Promise.all([
+      fetchTechStacks(),
+      fetchProjects(true)
+    ])
+    availableTechstacks.value = techData
+    projects.value = projData
   } catch (err) {
-    console.error('Failed to load tech stacks:', err)
+    projectsApiError.value = err instanceof Error ? err.message : 'Failed to load data.'
+    console.error('Data load error:', err)
   } finally {
     isLoadingTechstacks.value = false
+    isLoadingProjects.value = false
   }
 })
 
@@ -44,6 +57,9 @@ const newProjectForm = ref({
   featured: false,
 })
 
+const newProjectLoading = ref(false)
+const newProjectError = ref('')
+
 function toggleTechstack(id: number) {
   const idx = selectedTechstacks.value.indexOf(id)
   if (idx === -1) selectedTechstacks.value.push(id)
@@ -53,6 +69,7 @@ function toggleTechstack(id: number) {
 function openNewProjectDialog() {
   newProjectForm.value = { title: '', description: '', repo_url: '', live_url: '', status: 'pending', sort_order: 0, featured: false }
   selectedTechstacks.value = []
+  newProjectError.value = ''
   showNewProjectDialog.value = true
 }
 
@@ -60,10 +77,25 @@ function closeNewProjectDialog() {
   showNewProjectDialog.value = false
 }
 
-function submitNewProject() {
-  // TODO: wire up to API
-  console.log('New project:', { ...newProjectForm.value, techstacks: selectedTechstacks.value })
-  closeNewProjectDialog()
+async function submitNewProject() {
+  newProjectLoading.value = true
+  newProjectError.value = ''
+  try {
+    const payload = {
+      ...newProjectForm.value,
+      description: newProjectForm.value.description || null,
+      repo_url: newProjectForm.value.repo_url || null,
+      live_url: newProjectForm.value.live_url || null,
+      techstack_ids: selectedTechstacks.value,
+    }
+    const created = await createProject(payload)
+    projects.value.push(created)
+    closeNewProjectDialog()
+  } catch (err) {
+    newProjectError.value = err instanceof Error ? err.message : 'Failed to create project.'
+  } finally {
+    newProjectLoading.value = false
+  }
 }
 
 // ── Manage Project Dialog ────────────────────────────────────
@@ -79,23 +111,29 @@ const manageProjectForm = ref({
   featured: false,
 })
 
+const manageSelectedProjectId = ref<number | null>(null)
+const manageLoading = ref(false)
+const manageError = ref('')
+
 function toggleManageTechstack(id: number) {
   const idx = manageSelectedTechstacks.value.indexOf(id)
   if (idx === -1) manageSelectedTechstacks.value.push(id)
   else manageSelectedTechstacks.value.splice(idx, 1)
 }
 
-function openManageProjectDialog(p: typeof projects[number]) {
+function openManageProjectDialog(p: ProjectOut) {
+  manageSelectedProjectId.value = p.id
   manageProjectForm.value = {
     title: p.title,
-    description: '', // Mock data doesn't have description yet
-    repo_url: p.repo || '',
-    live_url: p.live || '',
-    status: p.status.toLowerCase(),
-    sort_order: 0,
+    description: p.description || '',
+    repo_url: p.repo_url || '',
+    live_url: p.live_url || '',
+    status: p.status,
+    sort_order: p.sort_order,
     featured: p.featured,
   }
-  manageSelectedTechstacks.value = [] // Mock empty selection
+  manageSelectedTechstacks.value = p.techstacks.map(t => t.id)
+  manageError.value = ''
   showManageProjectDialog.value = true
 }
 
@@ -103,16 +141,42 @@ function closeManageProjectDialog() {
   showManageProjectDialog.value = false
 }
 
-function submitManageProject() {
-  // TODO: wire up to API (PUT)
-  console.log('Update project:', { ...manageProjectForm.value, techstacks: manageSelectedTechstacks.value })
-  closeManageProjectDialog()
+async function submitManageProject() {
+  if (manageSelectedProjectId.value === null) return
+  manageLoading.value = true
+  manageError.value = ''
+  try {
+    const payload = {
+      ...manageProjectForm.value,
+      description: manageProjectForm.value.description || null,
+      repo_url: manageProjectForm.value.repo_url || null,
+      live_url: manageProjectForm.value.live_url || null,
+      techstack_ids: manageSelectedTechstacks.value,
+    }
+    const updated = await updateProject(manageSelectedProjectId.value, payload)
+    const idx = projects.value.findIndex(p => p.id === updated.id)
+    if (idx !== -1) projects.value[idx] = updated
+    closeManageProjectDialog()
+  } catch (err) {
+    manageError.value = err instanceof Error ? err.message : 'Failed to update project.'
+  } finally {
+    manageLoading.value = false
+  }
 }
 
-function deleteProject() {
-  // TODO: wire up to API (DELETE)
-  console.log('Delete project:', manageProjectForm.value.title)
-  closeManageProjectDialog()
+async function deleteProject() {
+  if (manageSelectedProjectId.value === null) return
+  manageLoading.value = true
+  manageError.value = ''
+  try {
+    await deleteProjectApi(manageSelectedProjectId.value)
+    projects.value = projects.value.filter(p => p.id !== manageSelectedProjectId.value)
+    closeManageProjectDialog()
+  } catch (err) {
+    manageError.value = err instanceof Error ? err.message : 'Failed to delete project.'
+  } finally {
+    manageLoading.value = false
+  }
 }
 </script>
 
@@ -124,7 +188,7 @@ function deleteProject() {
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-[11px] font-semibold tracking-widest uppercase text-[var(--on-surface)]" style="font-family:'JetBrains Mono',monospace;">// REPOSITORY_INDEX</h2>
-          <p class="text-[12px] text-[var(--on-surface-variant)] mt-1" style="font-family:'JetBrains Mono',monospace;">TOTAL_COUNT: 0{{ projects.length }}_PROJECTS</p>
+          <p class="text-[12px] text-[var(--on-surface-variant)] mt-1" style="font-family:'JetBrains Mono',monospace;">TOTAL_COUNT: {{ projects.length < 10 ? '0' + projects.length : projects.length }}_PROJECTS</p>
         </div>
         <button
           @click="openNewProjectDialog"
@@ -151,35 +215,47 @@ function deleteProject() {
               </tr>
             </thead>
             <tbody>
-              <tr
-                v-for="p in projects"
-                :key="p.title"
-                class="hover:bg-[var(--surface-variant)]/30 transition-colors border-b border-[var(--outline)]/30 text-[12px] text-[var(--on-surface-variant)]"
-                style="font-family:'JetBrains Mono',monospace;"
-              >
-                <td class="px-6 py-4 font-bold text-[var(--on-surface)]">{{ p.title }}</td>
-                <td class="px-6 py-4">
-                  <a href="#" class="text-[var(--primary-bright)] hover:underline flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[16px]">link</span>{{ p.repo }}
-                  </a>
-                </td>
-                <td class="px-6 py-4">
-                  <a v-if="p.live" href="#" class="text-[var(--primary-bright)] hover:underline flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[16px]">open_in_new</span>{{ p.live }}
-                  </a>
-                  <span v-else class="text-[var(--on-surface-variant)]">N/A</span>
-                </td>
-                <td class="px-6 py-4">
-                  <span :class="['px-2 py-0.5 border text-[10px] font-semibold tracking-widest uppercase', statusStyle[p.status].replace(/text-\[#[0-9a-f]+\]/, 'text-[var(--primary-bright)]').replace(/border-\[#[0-9a-f\/]+\]/, 'border-[var(--primary-bright)]/30').replace(/bg-\[#[0-9a-f\/]+\]/, 'bg-[var(--primary-bright)]/10')]">{{ p.status }}</span>
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <span v-if="p.featured" class="material-symbols-outlined text-[var(--primary-bright)] text-[20px]">check_circle</span>
-                  <span v-else class="material-symbols-outlined text-[var(--on-surface-variant)]/40 text-[20px]">cancel</span>
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <button @click="openManageProjectDialog(p)" class="px-3 py-1 border border-[var(--on-surface-variant)] text-[var(--on-surface)] hover:bg-[var(--surface-variant)] transition-colors text-[10px] font-semibold tracking-widest uppercase" style="font-family:'JetBrains Mono',monospace;">MANAGE</button>
-                </td>
+              <tr v-if="isLoadingProjects">
+                <td colspan="6" class="px-6 py-8 text-center text-[12px] text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">LOADING...</td>
               </tr>
+              <tr v-else-if="projectsApiError">
+                <td colspan="6" class="px-6 py-8 text-center text-[12px] text-[#fc7c78]" style="font-family:'JetBrains Mono',monospace;">ERR: {{ projectsApiError }}</td>
+              </tr>
+              <template v-else>
+                <tr
+                  v-for="p in projects"
+                  :key="p.id"
+                  class="hover:bg-[var(--surface-variant)]/30 transition-colors border-b border-[var(--outline)]/30 text-[12px] text-[var(--on-surface-variant)]"
+                  style="font-family:'JetBrains Mono',monospace;"
+                >
+                  <td class="px-6 py-4 font-bold text-[var(--on-surface)]">{{ p.title }}</td>
+                  <td class="px-6 py-4">
+                    <a v-if="p.repo_url" :href="p.repo_url" class="text-[var(--primary-bright)] hover:underline flex items-center gap-1" target="_blank">
+                      <span class="material-symbols-outlined text-[16px]">link</span>{{ p.repo_url.replace(/^https?:\/\//, '') }}
+                    </a>
+                    <span v-else class="text-[var(--on-surface-variant)]">N/A</span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <a v-if="p.live_url" :href="p.live_url" class="text-[var(--primary-bright)] hover:underline flex items-center gap-1" target="_blank">
+                      <span class="material-symbols-outlined text-[16px]">open_in_new</span>{{ p.live_url.replace(/^https?:\/\//, '') }}
+                    </a>
+                    <span v-else class="text-[var(--on-surface-variant)]">N/A</span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <span :class="['px-2 py-0.5 border text-[10px] font-semibold tracking-widest uppercase', (statusStyle[p.status.toUpperCase()] || statusStyle.STAGING).replace(/text-\[#[0-9a-f]+\]/, 'text-[var(--primary-bright)]').replace(/border-\[#[0-9a-f\/]+\]/, 'border-[var(--primary-bright)]/30').replace(/bg-\[#[0-9a-f\/]+\]/, 'bg-[var(--primary-bright)]/10')]">{{ p.status }}</span>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <span v-if="p.featured" class="material-symbols-outlined text-[var(--primary-bright)] text-[20px]">check_circle</span>
+                    <span v-else class="material-symbols-outlined text-[var(--on-surface-variant)]/40 text-[20px]">cancel</span>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <button @click="openManageProjectDialog(p)" class="px-3 py-1 border border-[var(--on-surface-variant)] text-[var(--on-surface)] hover:bg-[var(--surface-variant)] transition-colors text-[10px] font-semibold tracking-widest uppercase" style="font-family:'JetBrains Mono',monospace;">MANAGE</button>
+                  </td>
+                </tr>
+                <tr v-if="projects.length === 0">
+                  <td colspan="6" class="px-6 py-8 text-center text-[12px] text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">NO_PROJECTS_FOUND</td>
+                </tr>
+              </template>
             </tbody>
           </table>
         </div>
@@ -352,6 +428,7 @@ function deleteProject() {
 
               <!-- Actions -->
               <div class="flex justify-end gap-3 pt-2">
+                <p v-if="newProjectError" class="text-[11px] text-[#fc7c78] font-semibold tracking-widest mr-auto" style="font-family:'JetBrains Mono',monospace;">ERR: {{ newProjectError }}</p>
                 <button
                   type="button"
                   @click="closeNewProjectDialog"
@@ -360,9 +437,10 @@ function deleteProject() {
                 >CANCEL</button>
                 <button
                   type="submit"
-                  class="px-4 py-2 bg-[var(--primary)] text-[var(--on-primary)] text-[11px] font-semibold tracking-widest uppercase hover:bg-[var(--primary-bright)] transition-colors"
+                  :disabled="newProjectLoading"
+                  class="px-4 py-2 bg-[var(--primary)] text-[var(--on-primary)] text-[11px] font-semibold tracking-widest uppercase hover:bg-[var(--primary-bright)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   style="font-family:'JetBrains Mono',monospace;"
-                >CREATE_PROJECT</button>
+                >{{ newProjectLoading ? 'CREATING...' : 'CREATE_PROJECT' }}</button>
               </div>
             </form>
           </div>
@@ -533,12 +611,14 @@ function deleteProject() {
                 <button
                   type="button"
                   @click="deleteProject"
-                  class="flex items-center gap-1.5 px-4 py-2 border border-[#fc7c78]/40 text-[#fc7c78] text-[11px] font-semibold tracking-widest uppercase hover:bg-[#fc7c78]/10 transition-colors"
+                  :disabled="manageLoading"
+                  class="flex items-center gap-1.5 px-4 py-2 border border-[#fc7c78]/40 text-[#fc7c78] text-[11px] font-semibold tracking-widest uppercase hover:bg-[#fc7c78]/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   style="font-family:'JetBrains Mono',monospace;"
                 >
-                  <span class="material-symbols-outlined text-[16px]">delete</span>DELETE
+                  <span class="material-symbols-outlined text-[16px]">delete</span>{{ manageLoading ? 'DELETING...' : 'DELETE' }}
                 </button>
-                <div class="flex gap-3">
+                <div class="flex gap-3 items-center">
+                  <p v-if="manageError" class="text-[11px] text-[#fc7c78] font-semibold tracking-widest" style="font-family:'JetBrains Mono',monospace;">ERR: {{ manageError }}</p>
                   <button
                     type="button"
                     @click="closeManageProjectDialog"
@@ -547,9 +627,10 @@ function deleteProject() {
                   >CANCEL</button>
                   <button
                     type="submit"
-                    class="px-4 py-2 bg-[var(--primary)] text-[var(--on-primary)] text-[11px] font-semibold tracking-widest uppercase hover:bg-[var(--primary-bright)] transition-colors"
+                    :disabled="manageLoading"
+                    class="px-4 py-2 bg-[var(--primary)] text-[var(--on-primary)] text-[11px] font-semibold tracking-widest uppercase hover:bg-[var(--primary-bright)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     style="font-family:'JetBrains Mono',monospace;"
-                  >SAVE_CHANGES</button>
+                  >{{ manageLoading ? 'SAVING...' : 'SAVE_CHANGES' }}</button>
                 </div>
               </div>
             </form>
