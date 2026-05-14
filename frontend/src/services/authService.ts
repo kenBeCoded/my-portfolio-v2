@@ -60,7 +60,13 @@ export async function login(username: string, password: string): Promise<MeRespo
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}))
-    throw new Error(data?.detail ?? `HTTP ${res.status}: Authentication failed.`)
+    let msg = data?.detail ?? `HTTP ${res.status}: Authentication failed.`
+    
+    if (Array.isArray(msg)) {
+      msg = msg.map((err: any) => err.msg || JSON.stringify(err)).join(', ')
+    }
+    
+    throw new Error(msg)
   }
 
   const token: TokenResponse = await res.json()

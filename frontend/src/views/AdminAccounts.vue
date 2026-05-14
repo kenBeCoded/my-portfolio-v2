@@ -55,7 +55,6 @@ async function loadUsers() {
   apiError.value = ''
   try {
     accounts.value = await fetchUsers()
-    console.log(accounts.value)
   } catch (err: unknown) {
     apiError.value = err instanceof Error ? err.message : 'Failed to load users.'
   } finally {
@@ -211,15 +210,14 @@ async function deleteUser() {
             </tr>
             <!-- Data rows — wrapped in template so v-else applies to a single element -->
             <template v-else>
-              <tr
-                v-for="a in filtered"
-                :key="a.id"
+              <tr v-for="a in filtered" :key="a.id"
                 class="hover:bg-[var(--surface-variant)]/30 transition-colors border-b border-[var(--outline)]/30 text-[12px] text-[var(--on-surface-variant)]"
                 style="font-family:'JetBrains Mono',monospace;">
                 <td class="px-6 py-4 font-semibold text-[var(--on-surface)]">{{ a.username }}</td>
                 <td class="px-6 py-4">{{ a.fullname }}</td>
                 <td class="px-6 py-4">
-                  <span :class="['px-2 py-0.5 border text-[10px] font-semibold tracking-widest uppercase', getBadgeClass(a.role)]">
+                  <span
+                    :class="['px-2 py-0.5 border text-[10px] font-semibold tracking-widest uppercase', getBadgeClass(a.role)]">
                     {{ a.role }}
                   </span>
                 </td>

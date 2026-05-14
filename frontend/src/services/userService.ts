@@ -47,7 +47,19 @@ function authHeaders(): HeadersInit {
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
-    throw new Error(body?.detail ?? `HTTP ${res.status}`)
+    let msg = body?.detail ?? `HTTP ${res.status}`
+    
+    // If FastAPI returns a list of validation errors (e.g. 422 Unprocessable Entity)
+    if (Array.isArray(msg)) {
+      msg = msg.map((err: any) => {
+        const loc = err.loc ? err.loc.join('.') : 'error'
+        return `${loc}: ${err.msg}`
+      }).join(', ')
+    }
+
+    console.log(msg)
+    
+    throw new Error(msg)
   }
   return res.json() as Promise<T>
 }
