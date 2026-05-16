@@ -1,0 +1,111 @@
+Traceback (most recent call last):
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column techstack.logo_url does not exist
+LINE 1: ...k_name, techstack.category AS techstack_category, techstack....
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 96, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 154, in simple_response
+    await self.app(scope, receive, send)
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/fastapi/routing.py", line 330, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/app/api/routes/techstacks.py", line 34, in create_new_techstack
+    return create_techstack(db, techstack_data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/app/services/techstack_service.py", line 38, in create_techstack
+    existing = db.query(TechStack).filter(TechStack.name == techstack_data.name).first()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/sqlalchemy/orm/query.py", line 2766, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/sqlalchemy/orm/query.py", line 2864, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2351, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/dev-001/Desktop/Projects/my-portfolio/backend/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column techstack.logo_url does not exist
+LINE 1: ...k_name, techstack.category AS techstack_category, techstack....
+                                                             ^
+
+[SQL: SELECT techstack.id AS techstack_id, techstack.name AS techstack_name, techstack.category AS techstack_category, techstack.logo_url AS techstack_logo_url, techstack.sort_order AS techstack_sort_order, techstack.updated_at AS techstack_updated_at, techstack.created_at AS techstack_created_at 
+FROM techstack 
+WHERE techstack.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'name_1': 'javascript', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)

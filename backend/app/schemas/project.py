@@ -16,6 +16,7 @@ class ProjectCreate(BaseModel):
     description: str | None = None
     repo_url: str | None = None
     live_url: str | None = None
+    project_img_url: str | None = None
     status: str = Field(default="in-progress", max_length=20)
     sort_order: int = 0
     featured: bool = False
@@ -28,6 +29,7 @@ class ProjectUpdate(BaseModel):
     description: str | None = None
     repo_url: str | None = None
     live_url: str | None = None
+    project_img_url: str | None = None
     status: str | None = Field(default=None, max_length=20)
     sort_order: int | None = None
     featured: bool | None = None
@@ -48,6 +50,7 @@ class ProjectOut(BaseModel):
     description: str | None = None
     repo_url: str | None = None
     live_url: str | None = None
+    project_img_url: str | None = None
     status: str
     sort_order: int
     featured: bool

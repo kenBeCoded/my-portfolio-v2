@@ -14,6 +14,7 @@ export interface ProjectOut {
   description: string | null
   repo_url: string | null
   live_url: string | null
+  project_img_url: string | null
   status: string
   sort_order: number
   featured: boolean
@@ -28,6 +29,7 @@ export interface ProjectCreatePayload {
   description?: string | null
   repo_url?: string | null
   live_url?: string | null
+  project_img_url?: string | null
   status?: string
   sort_order?: number
   featured?: boolean
@@ -39,6 +41,7 @@ export interface ProjectUpdatePayload {
   description?: string | null
   repo_url?: string | null
   live_url?: string | null
+  project_img_url?: string | null
   status?: string
   sort_order?: number
   featured?: boolean

@@ -1,0 +1,13 @@
+{
+  "name": "my-portfolio",
+  "version": "1.0.0",
+  "description": "Portfolio project with FastAPI backend and Vue frontend",
+  "scripts": {
+    "dev:backend": "cd backend && ./venv/bin/uvicorn app.main:app --reload",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently -n \"backend,frontend\" -c \"lime,pink\" \"npm run dev:backend\" \"npm run dev:frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

@@ -49,6 +49,7 @@ def create_project(db: Session, project_data: ProjectCreate) -> Project:
         description=project_data.description,
         repo_url=project_data.repo_url,
         live_url=project_data.live_url,
+        project_img_url=project_data.project_img_url,
         status=project_data.status,
         sort_order=project_data.sort_order,
         featured=project_data.featured,

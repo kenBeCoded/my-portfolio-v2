@@ -18,6 +18,7 @@ class Project(Base):
     description = Column(Text, nullable=True)
     repo_url = Column(String(500), nullable=True)
     live_url = Column(String(500), nullable=True)
+    project_img_url = Column(String(500), nullable=True)
     status = Column(String(20), nullable=False, default="in-progress")  # in-progress, completed, archived
     sort_order = Column(Integer, nullable=False, default=0)
     featured = Column(Boolean, nullable=False, default=False)
