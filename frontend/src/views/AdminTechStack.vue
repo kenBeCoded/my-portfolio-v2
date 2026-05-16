@@ -16,6 +16,30 @@ const techStacks = ref<TechStackOut[]>([])
 const isLoading = ref(false)
 const apiError = ref('')
 
+// ── Pagination ──────────────────────────────────────────────
+const currentPage = ref(1)
+const itemsPerPage = ref(10)
+
+const totalPages = computed(() => Math.ceil(filtered.value.length / itemsPerPage.value) || 1)
+
+const paginatedTech = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return filtered.value.slice(start, end)
+})
+
+function nextPage() {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+function prevPage() {
+  if (currentPage.value > 1) currentPage.value--
+}
+
+function goToPage(p: number) {
+  currentPage.value = p
+}
+
 // ── Helpers ───────────────────────────────────────────────────
 function formatDate(iso: string | null): string {
   if (!iso) return '—'
@@ -256,7 +280,7 @@ async function deleteTech() {
               </tr>
               <!-- Data rows -->
               <template v-else>
-                <tr v-for="t in filtered" :key="t.id"
+                <tr v-for="t in paginatedTech" :key="t.id"
                   class="hover:bg-[var(--surface-variant)]/30 transition-colors border-b border-[var(--outline)]/30 text-[12px] text-[var(--on-surface-variant)]"
                   style="font-family:'JetBrains Mono',monospace;">
                   <td class="px-6 py-4 text-[var(--on-surface-variant)]">#TS-{{ String(t.id).padStart(3, '0') }}</td>
@@ -290,18 +314,27 @@ async function deleteTech() {
         </div>
 
         <!-- Pagination -->
-        <div class="p-4 border-t border-[var(--outline)] flex items-center gap-2">
+        <div v-if="filtered.length > 0" class="p-4 border-t border-[var(--outline)] flex items-center gap-2">
           <button
+            @click="prevPage"
+            :disabled="currentPage === 1"
             class="px-3 py-1 border border-[var(--outline)] text-[var(--on-surface)] text-[10px] font-semibold tracking-widest uppercase hover:bg-[var(--surface-variant)] disabled:opacity-30 transition-colors"
-            disabled style="font-family:'JetBrains Mono',monospace;">PREV</button>
+            style="font-family:'JetBrains Mono',monospace;">PREV</button>
+          
           <button
-            class="px-3 py-1 border border-[var(--outline)] text-[var(--on-surface)] bg-[var(--primary-bright)]/20 text-[10px] font-semibold tracking-widest uppercase"
-            style="font-family:'JetBrains Mono',monospace;">1</button>
+            v-for="p in totalPages"
+            :key="p"
+            @click="goToPage(p)"
+            :class="[
+              'px-3 py-1 border border-[var(--outline)] text-[var(--on-surface)] text-[10px] font-semibold tracking-widest uppercase transition-colors',
+              currentPage === p ? 'bg-[var(--primary-bright)]/20 border-[var(--primary-bright)]' : 'hover:bg-[var(--surface-variant)]'
+            ]"
+            style="font-family:'JetBrains Mono',monospace;">{{ p }}</button>
+
           <button
-            class="px-3 py-1 border border-[var(--outline)] text-[var(--on-surface)] text-[10px] font-semibold tracking-widest uppercase hover:bg-[var(--surface-variant)] transition-colors"
-            style="font-family:'JetBrains Mono',monospace;">2</button>
-          <button
-            class="px-3 py-1 border border-[var(--outline)] text-[var(--on-surface)] text-[10px] font-semibold tracking-widest uppercase hover:bg-[var(--surface-variant)] transition-colors"
+            @click="nextPage"
+            :disabled="currentPage === totalPages"
+            class="px-3 py-1 border border-[var(--outline)] text-[var(--on-surface)] text-[10px] font-semibold tracking-widest uppercase hover:bg-[var(--surface-variant)] disabled:opacity-30 transition-colors"
             style="font-family:'JetBrains Mono',monospace;">NEXT</button>
         </div>
       </section>

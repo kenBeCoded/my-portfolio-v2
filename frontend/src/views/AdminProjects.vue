@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import AdminLayout from '../components/AdminLayout.vue'
 import { fetchTechStacks, type TechStackOut } from '../services/techStackService'
 import {
@@ -23,6 +23,26 @@ const isLoadingTechstacks = ref(false)
 const projects = ref<ProjectOut[]>([])
 const isLoadingProjects = ref(true)
 const projectsApiError = ref('')
+
+// ── Pagination ──────────────────────────────────────────────
+const currentPage = ref(1)
+const itemsPerPage = ref(10)
+
+const totalPages = computed(() => Math.ceil(projects.value.length / itemsPerPage.value) || 1)
+
+const paginatedProjects = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return projects.value.slice(start, end)
+})
+
+function nextPage() {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+function prevPage() {
+  if (currentPage.value > 1) currentPage.value--
+}
 
 onMounted(async () => {
   isLoadingTechstacks.value = true
@@ -223,7 +243,7 @@ async function deleteProject() {
               </tr>
               <template v-else>
                 <tr
-                  v-for="p in projects"
+                  v-for="p in paginatedProjects"
                   :key="p.id"
                   class="hover:bg-[var(--surface-variant)]/30 transition-colors border-b border-[var(--outline)]/30 text-[12px] text-[var(--on-surface-variant)]"
                   style="font-family:'JetBrains Mono',monospace;"
@@ -261,11 +281,25 @@ async function deleteProject() {
         </div>
 
         <!-- Pagination -->
-        <div class="p-4 border-t border-[var(--outline)] bg-[var(--surface-variant)]/10 flex justify-between items-center">
-          <p class="text-[10px] text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">INDEX_PAGE_01_OF_02</p>
+        <div v-if="projects.length > 0" class="p-4 border-t border-[var(--outline)] bg-[var(--surface-variant)]/10 flex justify-between items-center">
+          <p class="text-[10px] text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">
+            INDEX_PAGE_{{ currentPage.toString().padStart(2, '0') }}_OF_{{ totalPages.toString().padStart(2, '0') }}
+          </p>
           <div class="flex gap-2">
-            <button class="text-[var(--primary-bright)] hover:opacity-70 transition-opacity"><span class="material-symbols-outlined">chevron_left</span></button>
-            <button class="text-[var(--primary-bright)] hover:opacity-70 transition-opacity"><span class="material-symbols-outlined">chevron_right</span></button>
+            <button
+              @click="prevPage"
+              :disabled="currentPage === 1"
+              class="text-[var(--primary-bright)] hover:opacity-70 transition-opacity disabled:opacity-20 disabled:cursor-not-allowed"
+            >
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button
+              @click="nextPage"
+              :disabled="currentPage === totalPages"
+              class="text-[var(--primary-bright)] hover:opacity-70 transition-opacity disabled:opacity-20 disabled:cursor-not-allowed"
+            >
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
           </div>
         </div>
       </div>

@@ -15,6 +15,26 @@ const accounts = ref<UserOut[]>([])
 const isLoading = ref(false)
 const apiError = ref('')
 
+// ── Pagination ──────────────────────────────────────────────
+const currentPage = ref(1)
+const itemsPerPage = ref(10)
+
+const totalPages = computed(() => Math.ceil(filtered.value.length / itemsPerPage.value) || 1)
+
+const paginatedAccounts = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return filtered.value.slice(start, end)
+})
+
+function nextPage() {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+function prevPage() {
+  if (currentPage.value > 1) currentPage.value--
+}
+
 
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -210,7 +230,7 @@ async function deleteUser() {
             </tr>
             <!-- Data rows — wrapped in template so v-else applies to a single element -->
             <template v-else>
-              <tr v-for="a in filtered" :key="a.id"
+              <tr v-for="a in paginatedAccounts" :key="a.id"
                 class="hover:bg-[var(--surface-variant)]/30 transition-colors border-b border-[var(--outline)]/30 text-[12px] text-[var(--on-surface-variant)]"
                 style="font-family:'JetBrains Mono',monospace;">
                 <td class="px-6 py-4 font-semibold text-[var(--on-surface)]">{{ a.username }}</td>
@@ -240,17 +260,23 @@ async function deleteUser() {
 
       <!-- Pagination footer -->
       <div
+        v-if="filtered.length > 0"
         class="p-4 border-t border-[var(--outline)] bg-[var(--surface-variant)]/10 flex justify-between items-center">
         <p class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]"
-          style="font-family:'JetBrains Mono',monospace;">SHOWING {{ filtered.length }} OF {{ accounts.length }} USERS
+          style="font-family:'JetBrains Mono',monospace;">
+          INDEX_PAGE_{{ currentPage.toString().padStart(2, '0') }}_OF_{{ totalPages.toString().padStart(2, '0') }}
         </p>
         <div class="flex gap-2">
           <button
-            class="p-1 text-[var(--on-surface-variant)] hover:text-[var(--primary-bright)] transition-colors disabled:opacity-30"
-            disabled>
+            @click="prevPage"
+            :disabled="currentPage === 1"
+            class="p-1 text-[var(--on-surface-variant)] hover:text-[var(--primary-bright)] transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
             <span class="material-symbols-outlined">chevron_left</span>
           </button>
-          <button class="p-1 text-[var(--on-surface-variant)] hover:text-[var(--primary-bright)] transition-colors">
+          <button
+            @click="nextPage"
+            :disabled="currentPage === totalPages"
+            class="p-1 text-[var(--on-surface-variant)] hover:text-[var(--primary-bright)] transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
             <span class="material-symbols-outlined">chevron_right</span>
           </button>
         </div>
