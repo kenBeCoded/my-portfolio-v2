@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { fetchTechStacks, type TechStackOut } from '../services/techStackService'
 
 const activeSection = ref('home')
 const mobileMenuOpen = ref(false)
@@ -34,14 +35,24 @@ const projects = [
   },
 ]
 
-const techStack = [
-  { category: 'Languages',        icon: 'code',              items: ['JavaScript / TypeScript', 'Python'] },
-  { category: 'Frontend',         icon: 'layers',            items: ['HTML/CSS', 'Vue 3', 'React', 'Tailwind CSS'] },
-  { category: 'Backend',          icon: 'settings_ethernet', items: ['Node.js', 'Express.js', 'FastAPI'] },
-  { category: 'Databases',        icon: 'database',          items: ['MongoDB', 'PostgreSQL'] },
-  { category: 'Tools & Platforms',icon: 'build',             items: ['Git', 'GitHub', 'Docker', 'Supabase', 'Postman', 'VS Code'], wide: true },
-  { category: 'Other & AI Tools', icon: 'bolt',              items: ['REST APIs', 'GraphQL', 'CI/CD', 'Claude', 'Gemini', 'ChatGPT'], wide: true, accent: true },
-]
+const apiTechStacks = ref<TechStackOut[]>([])
+
+const techStack = computed(() => {
+  const filterByCategory = (...catPrefixes: string[]) => {
+    return apiTechStacks.value
+      .filter(t => catPrefixes.some(prefix => t.category.toUpperCase().includes(prefix.toUpperCase())))
+      .sort((a, b) => a.sort_order - b.sort_order)
+  }
+
+  return [
+    { category: 'Languages',        icon: 'code',              items: filterByCategory('LANGUAGE') },
+    { category: 'Frontend',         icon: 'layers',            items: filterByCategory('FRONTEND') },
+    { category: 'Backend',          icon: 'settings_ethernet', items: filterByCategory('BACKEND') },
+    { category: 'Databases',        icon: 'database',          items: filterByCategory('DATABASE') },
+    { category: 'Tools & Platforms',icon: 'build',             items: filterByCategory('TOOL'), wide: true },
+    { category: 'Other & AI Tools', icon: 'bolt',              items: filterByCategory('OTHER', 'AI'), wide: true, accent: true },
+  ]
+})
 
 const contactLinks = [
   { label: 'Gmail',    icon: 'mail',     value: 'root@backend.dev',     href: 'mailto:root@backend.dev' },
@@ -68,7 +79,14 @@ function onScroll() {
   }
 }
 
-onMounted(() => window.addEventListener('scroll', onScroll))
+onMounted(async () => {
+  window.addEventListener('scroll', onScroll)
+  try {
+    apiTechStacks.value = await fetchTechStacks()
+  } catch (error) {
+    console.error('Failed to load tech stacks:', error)
+  }
+})
 onUnmounted(() => window.removeEventListener('scroll', onScroll))
 </script>
 
@@ -193,18 +211,25 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
               <span class="material-symbols-outlined text-[#4edea3]">{{ t.icon }}</span>
               <h3 class="text-[11px] font-semibold tracking-widest uppercase text-[#dae2fd]" style="font-family:'JetBrains Mono',monospace;">{{ t.category }}</h3>
             </div>
-            <div class="flex flex-wrap gap-2">
-              <span
-                v-for="item in t.items" :key="item"
-                :class="[
-                  'text-[12px] px-3 py-1 border',
-                  'font-[JetBrains_Mono,monospace]',
-                  t.accent && ['Claude','Gemini','ChatGPT'].includes(item)
-                    ? 'bg-[#4edea3]/10 border-[#4edea3]/30 text-[#4edea3]'
-                    : 'bg-[#171f33] border-[#3c4a42] text-[#86948a]'
-                ]"
-                style="font-family:'JetBrains Mono',monospace;"
-              >{{ item }}</span>
+            <div class="flex flex-wrap gap-4">
+              <template v-for="item in t.items" :key="item.id">
+                <div v-if="item.logo_url" class="relative group flex items-center justify-center">
+                  <img :src="item.logo_url" :alt="item.name.toUpperCase()"
+                    class="h-10 w-10 object-contain hover:scale-110 transition-transform filter brightness-90 hover:brightness-110" />
+                  <span class="absolute -top-10 bg-[#171f33] border border-[#3c4a42] text-[#dae2fd] text-[10px] px-3 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-lg" style="font-family:'JetBrains Mono',monospace; letter-spacing: 0.05em;">{{ item.name.toUpperCase() }}</span>
+                </div>
+                <span v-else
+                  :class="[
+                    'text-[12px] px-3 py-1 border flex items-center justify-center min-h-[40px]',
+                    'font-[JetBrains_Mono,monospace]',
+                    t.accent
+                      ? 'bg-[#4edea3]/10 border-[#4edea3]/30 text-[#4edea3]'
+                      : 'bg-[#171f33] border-[#3c4a42] text-[#86948a]'
+                  ]"
+                  style="font-family:'JetBrains Mono',monospace;"
+                  :title="item.name.toUpperCase()"
+                >{{ item.name.toUpperCase() }}</span>
+              </template>
             </div>
           </div>
         </div>
