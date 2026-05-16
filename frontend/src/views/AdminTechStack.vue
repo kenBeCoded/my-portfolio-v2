@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import AdminLayout from '../components/AdminLayout.vue'
 import {
   fetchTechStacks,
@@ -15,6 +15,10 @@ const category = ref('ALL_CATEGORIES')
 const techStacks = ref<TechStackOut[]>([])
 const isLoading = ref(false)
 const apiError = ref('')
+
+watch([search, category], () => {
+  currentPage.value = 1
+})
 
 // ── Pagination ──────────────────────────────────────────────
 const currentPage = ref(1)
