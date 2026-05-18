@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { fetchTechStacks, type TechStackOut } from '../services/techStackService'
+import { logVisit, getOrCreateVisitorId } from '../services/visitorService'
 
 const activeSection = ref('home')
 const mobileMenuOpen = ref(false)
@@ -81,6 +82,21 @@ function onScroll() {
 
 onMounted(async () => {
   window.addEventListener('scroll', onScroll)
+
+  // ── Visitor tracking (once per browser session) ──────────────────────────
+  // Uses sessionStorage flag to prevent duplicate logs on refresh/navigation.
+  // All errors are silently swallowed to guarantee no UX impact.
+  try {
+    if (!sessionStorage.getItem('portfolio_visited')) {
+      const visitorId = getOrCreateVisitorId()
+      await logVisit(visitorId, window.location.pathname, document.referrer)
+      sessionStorage.setItem('portfolio_visited', 'true')
+    }
+  } catch {
+    // Intentionally silent
+  }
+
+  // ── Tech stack data ───────────────────────────────────────────────────────
   try {
     apiTechStacks.value = await fetchTechStacks()
   } catch (error) {
