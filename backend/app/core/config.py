@@ -23,3 +23,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
 # ── App ─────────────────────────────────────────────────────
 APP_NAME: str = os.getenv("APP_NAME", "My Portfolio API")
 DEBUG: bool = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes")
+
+# ── CORS ─────────────────────────────────────────────────────
+_raw_origins: str = os.getenv("CORS_ORIGINS", "http://localhost:5173")
+CORS_ORIGINS: list[str] = [o.strip() for o in _raw_origins.split(",") if o.strip()]

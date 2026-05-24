@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import APP_NAME, DEBUG
+from app.core.config import APP_NAME, DEBUG, CORS_ORIGINS
 from app.db.base import Base
 from app.db.session import engine
 import app.models  # noqa: F401 — register all models with Base.metadata
@@ -34,7 +34,7 @@ app = FastAPI(
 # ── CORS middleware ─────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten in production
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
