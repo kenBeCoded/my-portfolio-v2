@@ -3,7 +3,8 @@ FastAPI application entry point.
 """
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import APP_NAME, DEBUG, CORS_ORIGINS
@@ -42,6 +43,21 @@ app.add_middleware(
 
 # ── Register routers ───────────────────────────────────────
 app.include_router(api_router, prefix="/api")
+
+
+# ── Global Exception Handler ────────────────────────────────
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    import traceback
+    traceback.print_exc()  # This will print the stack trace in Render logs
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Internal Server Error",
+            "error": str(exc),
+            "type": exc.__class__.__name__,
+        },
+    )
 
 
 # ── Health check ────────────────────────────────────────────
