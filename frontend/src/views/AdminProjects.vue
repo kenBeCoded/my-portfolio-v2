@@ -72,6 +72,7 @@ const newProjectForm = ref({
   description: '',
   repo_url: '',
   live_url: '',
+  project_img_url: '',
   status: 'pending',
   sort_order: 0,
   featured: false,
@@ -87,7 +88,7 @@ function toggleTechstack(id: number) {
 }
 
 function openNewProjectDialog() {
-  newProjectForm.value = { title: '', description: '', repo_url: '', live_url: '', status: 'pending', sort_order: 0, featured: false }
+  newProjectForm.value = { title: '', description: '', repo_url: '', live_url: '', project_img_url: '', status: 'pending', sort_order: 0, featured: false }
   selectedTechstacks.value = []
   newProjectError.value = ''
   showNewProjectDialog.value = true
@@ -106,6 +107,7 @@ async function submitNewProject() {
       description: newProjectForm.value.description || null,
       repo_url: newProjectForm.value.repo_url || null,
       live_url: newProjectForm.value.live_url || null,
+      project_img_url: newProjectForm.value.project_img_url || null,
       techstack_ids: selectedTechstacks.value,
     }
     const created = await createProject(payload)
@@ -126,6 +128,7 @@ const manageProjectForm = ref({
   description: '',
   repo_url: '',
   live_url: '',
+  project_img_url: '',
   status: 'pending',
   sort_order: 0,
   featured: false,
@@ -148,6 +151,7 @@ function openManageProjectDialog(p: ProjectOut) {
     description: p.description || '',
     repo_url: p.repo_url || '',
     live_url: p.live_url || '',
+    project_img_url: p.project_img_url || '',
     status: p.status,
     sort_order: p.sort_order,
     featured: p.featured,
@@ -171,6 +175,7 @@ async function submitManageProject() {
       description: manageProjectForm.value.description || null,
       repo_url: manageProjectForm.value.repo_url || null,
       live_url: manageProjectForm.value.live_url || null,
+      project_img_url: manageProjectForm.value.project_img_url || null,
       techstack_ids: manageSelectedTechstacks.value,
     }
     const updated = await updateProject(manageSelectedProjectId.value, payload)
@@ -386,6 +391,18 @@ async function deleteProject() {
                 />
               </div>
 
+              <!-- Image URL -->
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">IMAGE URL</label>
+                <input
+                  v-model="newProjectForm.project_img_url"
+                  type="url"
+                  placeholder="https://example.com/image.png"
+                  class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors placeholder-[var(--outline)]"
+                  style="font-family:'JetBrains Mono',monospace;"
+                />
+              </div>
+
               <!-- Status + Sort Order (row) -->
               <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1">
@@ -557,6 +574,18 @@ async function deleteProject() {
                   v-model="manageProjectForm.live_url"
                   type="url"
                   placeholder="https://myproject.io"
+                  class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors placeholder-[var(--outline)]"
+                  style="font-family:'JetBrains Mono',monospace;"
+                />
+              </div>
+
+              <!-- Image URL -->
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold tracking-widest uppercase text-[var(--on-surface-variant)]" style="font-family:'JetBrains Mono',monospace;">IMAGE URL</label>
+                <input
+                  v-model="manageProjectForm.project_img_url"
+                  type="url"
+                  placeholder="https://example.com/image.png"
                   class="w-full bg-[var(--background)] border border-[var(--outline)] text-[var(--on-surface)] px-4 py-2 text-[12px] focus:outline-none focus:border-[var(--primary-bright)] transition-colors placeholder-[var(--outline)]"
                   style="font-family:'JetBrains Mono',monospace;"
                 />
