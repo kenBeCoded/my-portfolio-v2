@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { fetchTechStacks, type TechStackOut } from '../services/techStackService'
 import { logVisit, getOrCreateVisitorId } from '../services/visitorService'
 import { fetchProjects, type ProjectOut } from '../services/projectService'
 
@@ -175,7 +176,26 @@ function getFallbackIcon(p: ProjectOut) {
   return 'deployed_code'
 }
 
+const apiTechStacks = ref<TechStackOut[]>([])
+const isLoadingTechStacks = ref(true)
 const isLoadingProjects = ref(true)
+
+const techStack = computed(() => {
+  const filterByCategory = (...catPrefixes: string[]) => {
+    return apiTechStacks.value
+      .filter(t => catPrefixes.some(prefix => t.category.toUpperCase().includes(prefix.toUpperCase())))
+      .sort((a, b) => a.sort_order - b.sort_order)
+  }
+
+  return [
+    { category: 'Languages', icon: 'code', items: filterByCategory('LANGUAGE') },
+    { category: 'Frontend', icon: 'layers', items: filterByCategory('FRONTEND') },
+    { category: 'Backend', icon: 'settings_ethernet', items: filterByCategory('BACKEND') },
+    { category: 'Databases', icon: 'database', items: filterByCategory('DATABASE') },
+    { category: 'Tools & Platforms', icon: 'build', items: filterByCategory('TOOL'), wide: true },
+    { category: 'Other & AI Tools', icon: 'bolt', items: filterByCategory('OTHER', 'AI'), wide: true, accent: true },
+  ]
+})
 
 const contactLinks = [
   { label: 'Gmail', icon: 'mail', value: 'root@backend.dev', href: 'mailto:root@backend.dev' },
@@ -216,6 +236,16 @@ onMounted(async () => {
     }
   } catch {
     // Intentionally silent
+  }
+
+  // ── Tech stack data ───────────────────────────────────────────────────────
+  isLoadingTechStacks.value = true
+  try {
+    apiTechStacks.value = await fetchTechStacks()
+  } catch (error) {
+    console.error('Failed to load tech stacks:', error)
+  } finally {
+    isLoadingTechStacks.value = false
   }
 
   // ── Projects data ─────────────────────────────────────────────────────────
@@ -300,52 +330,102 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     <main class="relative z-10">
 
       <!-- ── HERO SECTION ── -->
-      <section id="home"
-        class="max-w-[1200px] mx-auto px-5 md:px-16 pt-40 pb-32 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-        <div class="md:col-span-8 flex flex-col gap-8">
-          <h1 class="text-4xl md:text-5xl font-bold tracking-wider text-[#4edea3]"
-            style="font-family:'JetBrains Mono',monospace;">
-            // WHO_AM_I
-          </h1>
+      <section id="home" class="max-w-[1200px] mx-auto px-5 md:px-16 pt-40 pb-32">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center pb-24">
+          <div class="md:col-span-8 flex flex-col gap-8">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-wider text-[#4edea3]"
+              style="font-family:'JetBrains Mono',monospace;">
+              // WHO_AM_I
+            </h1>
 
-          <p class="text-lg text-[#dae2fd] max-w-2xl leading-relaxed" style="font-family:'JetBrains Mono',monospace;">
-            I am an aspiring <span class="text-[#4edea3]">Fullstack Developer</span> architecting the future
-            of robust backend systems. My journey is defined by a relentless pursuit of
-            engineering excellence, moving beyond simple features into the realm of distributed scalability and
-            high-availability infrastructures.
-          </p>
+            <p class="text-lg text-[#dae2fd] max-w-2xl leading-relaxed" style="font-family:'JetBrains Mono',monospace;">
+              I am an aspiring <span class="text-[#4edea3]">Fullstack Developer</span> architecting the future
+              of robust backend systems. My journey is defined by a relentless pursuit of
+              engineering excellence, moving beyond simple features into the realm of distributed scalability and
+              high-availability infrastructures.
+            </p>
 
-          <div class="flex flex-wrap gap-4 pt-2">
-            <button @click="scrollTo('contact')"
-              class="bg-[#10b981] text-[#003824] px-8 py-3 font-semibold tracking-widest uppercase text-[11px] hover:bg-[#4edea3] transition-colors"
-              style="font-family:'JetBrains Mono',monospace;">INITIALIZE_CONTACT</button>
-            <button @click="scrollTo('projects')"
-              class="border border-[#3c4a42] text-[#dae2fd] px-8 py-3 font-semibold tracking-widest uppercase text-[11px] hover:border-[#4edea3] transition-colors"
-              style="font-family:'JetBrains Mono',monospace;">VIEW_REPOSITORY</button>
+            <div class="flex flex-wrap gap-4 pt-2">
+              <button @click="scrollTo('contact')"
+                class="bg-[#10b981] text-[#003824] px-8 py-3 font-semibold tracking-widest uppercase text-[11px] hover:bg-[#4edea3] transition-colors"
+                style="font-family:'JetBrains Mono',monospace;">INITIALIZE_CONTACT</button>
+              <button @click="scrollTo('projects')"
+                class="border border-[#3c4a42] text-[#dae2fd] px-8 py-3 font-semibold tracking-widest uppercase text-[11px] hover:border-[#4edea3] transition-colors"
+                style="font-family:'JetBrains Mono',monospace;">VIEW_REPOSITORY</button>
+            </div>
+          </div>
+
+          <!-- Code card -->
+          <div class="md:col-span-4 hidden md:block">
+            <div class="bg-[#171f33] border border-[#3c4a42] p-6 relative">
+              <div class="absolute top-2 right-2 text-[10px] text-[#86948a] opacity-50"
+                style="font-family:'JetBrains Mono',monospace;">SYS_LOG.TS</div>
+              <div class="space-y-2 text-[13px]" style="font-family:'JetBrains Mono',monospace;line-height:1.6;">
+                <div><span class="text-[#86948a]">01</span> <span class="text-[#4edea3]">interface</span> <span
+                    class="text-[#ffb3af]">Developer</span> <span class="text-[#dae2fd]">{</span></div>
+                <div><span class="text-[#86948a]">02</span> <span class="text-[#dae2fd] ml-4">focus:</span> <span
+                    class="text-[#c2c4e3]">'Backend'</span><span class="text-[#dae2fd]">;</span></div>
+                <div><span class="text-[#86948a]">03</span> <span class="text-[#dae2fd] ml-4">stack:</span> <span
+                    class="text-[#c2c4e3]">['Node', 'TS', 'Python']</span><span class="text-[#dae2fd]">;</span></div>
+                <div><span class="text-[#86948a]">04</span> <span class="text-[#dae2fd] ml-4">status:</span> <span
+                    class="text-[#c2c4e3]">'Continuous Learning'</span><span class="text-[#dae2fd]">;</span></div>
+                <div><span class="text-[#86948a]">05</span> <span class="text-[#dae2fd]">}</span></div>
+              </div>
+              <div class="mt-6 pt-4 border-t border-[#3c4a42] flex justify-between items-center">
+                <span class="text-[10px] text-[#86948a]" style="font-family:'JetBrains Mono',monospace;">STABILITY:
+                  99.9%</span>
+                <div class="h-1 w-24 bg-[#2d3449] overflow-hidden">
+                  <div class="h-full bg-[#10b981]" style="width:80%;"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Code card -->
-        <div class="md:col-span-4 hidden md:block">
-          <div class="bg-[#171f33] border border-[#3c4a42] p-6 relative">
-            <div class="absolute top-2 right-2 text-[10px] text-[#86948a] opacity-50"
-              style="font-family:'JetBrains Mono',monospace;">SYS_LOG.TS</div>
-            <div class="space-y-2 text-[13px]" style="font-family:'JetBrains Mono',monospace;line-height:1.6;">
-              <div><span class="text-[#86948a]">01</span> <span class="text-[#4edea3]">interface</span> <span
-                  class="text-[#ffb3af]">Developer</span> <span class="text-[#dae2fd]">{</span></div>
-              <div><span class="text-[#86948a]">02</span> <span class="text-[#dae2fd] ml-4">focus:</span> <span
-                  class="text-[#c2c4e3]">'Backend'</span><span class="text-[#dae2fd]">;</span></div>
-              <div><span class="text-[#86948a]">03</span> <span class="text-[#dae2fd] ml-4">stack:</span> <span
-                  class="text-[#c2c4e3]">['Node', 'TS', 'Python']</span><span class="text-[#dae2fd]">;</span></div>
-              <div><span class="text-[#86948a]">04</span> <span class="text-[#dae2fd] ml-4">status:</span> <span
-                  class="text-[#c2c4e3]">'Continuous Learning'</span><span class="text-[#dae2fd]">;</span></div>
-              <div><span class="text-[#86948a]">05</span> <span class="text-[#dae2fd]">}</span></div>
+        <!-- Tech stack cards -->
+        <div class="border-t border-[#3c4a42]/30 pt-20">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-14">
+            <div>
+              <p class="text-[11px] font-semibold tracking-widest uppercase text-[#4edea3] mb-2" style="font-family:'JetBrains Mono',monospace;">// FULL_STACK_INVENTORY</p>
+              <h2 class="text-3xl font-bold tracking-tight text-[#dae2fd]">Engineered Infrastructure</h2>
             </div>
-            <div class="mt-6 pt-4 border-t border-[#3c4a42] flex justify-between items-center">
-              <span class="text-[10px] text-[#86948a]" style="font-family:'JetBrains Mono',monospace;">STABILITY:
-                99.9%</span>
-              <div class="h-1 w-24 bg-[#2d3449] overflow-hidden">
-                <div class="h-full bg-[#10b981]" style="width:80%;"></div>
+            <div class="text-[11px] text-[#86948a] text-right leading-relaxed" style="font-family:'JetBrains Mono',monospace;">VER_04.22.99<br/>STATUS: OPERATIONAL</div>
+          </div>
+
+          <div v-if="isLoadingTechStacks"
+            class="flex flex-col items-center justify-center py-20 border border-[#3c4a42]/30 bg-[#060e20]">
+            <span class="material-symbols-outlined text-4xl text-[#4edea3] animate-spin mb-4">progress_activity</span>
+            <p class="text-[11px] font-semibold tracking-widest uppercase text-[#86948a]"
+              style="font-family:'JetBrains Mono',monospace;">// SYNCING_TECH_STACKS...</p>
+          </div>
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div
+              v-for="t in techStack" :key="t.category"
+              :class="['flex flex-col gap-4 p-6 bg-[#171f33]/40 border border-[#3c4a42] hover:border-[#4edea3]/50 transition-colors', t.wide ? 'lg:col-span-2' : '', t.category === 'Other & AI Tools' ? 'lg:col-span-3' : '']"
+            >
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-[#4edea3]">{{ t.icon }}</span>
+                <h3 class="text-[11px] font-semibold tracking-widest uppercase text-[#dae2fd]" style="font-family:'JetBrains Mono',monospace;">{{ t.category }}</h3>
+              </div>
+              <div class="flex flex-wrap gap-4">
+                <template v-for="item in t.items" :key="item.id">
+                  <div v-if="item.logo_url" class="relative group flex items-center justify-center">
+                    <img :src="item.logo_url" :alt="item.name.toUpperCase()"
+                      class="h-10 w-10 object-contain hover:scale-110 transition-transform filter brightness-90 hover:brightness-110" />
+                    <span class="absolute -top-10 bg-[#171f33] border border-[#3c4a42] text-[#dae2fd] text-[10px] px-3 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-lg" style="font-family:'JetBrains Mono',monospace; letter-spacing: 0.05em;">{{ item.name.toUpperCase() }}</span>
+                  </div>
+                  <span v-else
+                    :class="[
+                      'text-[12px] px-3 py-1 border flex items-center justify-center min-h-[40px]',
+                      'font-[JetBrains_Mono,monospace]',
+                      t.accent
+                        ? 'bg-[#4edea3]/10 border-[#4edea3]/30 text-[#4edea3]'
+                        : 'bg-[#171f33] border-[#3c4a42] text-[#86948a]'
+                    ]"
+                    style="font-family:'JetBrains Mono',monospace;"
+                    :title="item.name.toUpperCase()"
+                  >{{ item.name.toUpperCase() }}</span>
+                </template>
               </div>
             </div>
           </div>
