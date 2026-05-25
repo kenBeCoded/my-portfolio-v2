@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { fetchTechStacks, type TechStackOut } from '../services/techStackService'
 import { logVisit, getOrCreateVisitorId } from '../services/visitorService'
 import { fetchProjects, type ProjectOut } from '../services/projectService'
 
@@ -176,26 +175,7 @@ function getFallbackIcon(p: ProjectOut) {
   return 'deployed_code'
 }
 
-const apiTechStacks = ref<TechStackOut[]>([])
-const isLoadingTechStacks = ref(true)
 const isLoadingProjects = ref(true)
-
-const techStack = computed(() => {
-  const filterByCategory = (...catPrefixes: string[]) => {
-    return apiTechStacks.value
-      .filter(t => catPrefixes.some(prefix => t.category.toUpperCase().includes(prefix.toUpperCase())))
-      .sort((a, b) => a.sort_order - b.sort_order)
-  }
-
-  return [
-    { category: 'Languages', icon: 'code', items: filterByCategory('LANGUAGE') },
-    { category: 'Frontend', icon: 'layers', items: filterByCategory('FRONTEND') },
-    { category: 'Backend', icon: 'settings_ethernet', items: filterByCategory('BACKEND') },
-    { category: 'Databases', icon: 'database', items: filterByCategory('DATABASE') },
-    { category: 'Tools & Platforms', icon: 'build', items: filterByCategory('TOOL'), wide: true },
-    { category: 'Other & AI Tools', icon: 'bolt', items: filterByCategory('OTHER', 'AI'), wide: true, accent: true },
-  ]
-})
 
 const contactLinks = [
   { label: 'Gmail', icon: 'mail', value: 'root@backend.dev', href: 'mailto:root@backend.dev' },
@@ -236,16 +216,6 @@ onMounted(async () => {
     }
   } catch {
     // Intentionally silent
-  }
-
-  // ── Tech stack data ───────────────────────────────────────────────────────
-  isLoadingTechStacks.value = true
-  try {
-    apiTechStacks.value = await fetchTechStacks()
-  } catch (error) {
-    console.error('Failed to load tech stacks:', error)
-  } finally {
-    isLoadingTechStacks.value = false
   }
 
   // ── Projects data ─────────────────────────────────────────────────────────
@@ -390,27 +360,25 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
               style="font-family:'JetBrains Mono',monospace;">// WORK_HISTORY_LOGS</p>
             <h2 class="text-3xl font-bold tracking-tight text-[#dae2fd]">Professional Experience</h2>
           </div>
-          
+
           <!-- Layout View Switcher -->
-          <div class="flex items-center border border-[#3c4a42] p-1 bg-[#171f33]/40" style="font-family:'JetBrains Mono',monospace;">
-            <button 
-              @click="viewMode = 'explorer'"
-              :class="['px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer', viewMode === 'explorer' ? 'bg-[#10b981] text-[#003824]' : 'text-[#86948a] hover:text-[#dae2fd]']"
-            >
+          <div class="flex items-center border border-[#3c4a42] p-1 bg-[#171f33]/40"
+            style="font-family:'JetBrains Mono',monospace;">
+            <button @click="viewMode = 'explorer'"
+              :class="['px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer', viewMode === 'explorer' ? 'bg-[#10b981] text-[#003824]' : 'text-[#86948a] hover:text-[#dae2fd]']">
               Explorer View
             </button>
-            <button 
-              @click="viewMode = 'timeline'"
-              :class="['px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer', viewMode === 'timeline' ? 'bg-[#10b981] text-[#003824]' : 'text-[#86948a] hover:text-[#dae2fd]']"
-            >
+            <button @click="viewMode = 'timeline'"
+              :class="['px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer', viewMode === 'timeline' ? 'bg-[#10b981] text-[#003824]' : 'text-[#86948a] hover:text-[#dae2fd]']">
               Timeline View
             </button>
           </div>
         </div>
 
         <!-- 1. EXPLORER / IDE VIEW -->
-        <div v-if="viewMode === 'explorer'" class="grid grid-cols-1 lg:grid-cols-12 border border-[#3c4a42] bg-[#0b1326] min-h-[500px]">
-          
+        <div v-if="viewMode === 'explorer'"
+          class="grid grid-cols-1 lg:grid-cols-12 border border-[#3c4a42] bg-[#0b1326] min-h-[500px]">
+
           <!-- Left Panel (Sidebar Explorer) -->
           <div class="lg:col-span-4 border-r border-[#3c4a42] flex flex-col bg-[#060e20]/60">
             <!-- Sidebar Header -->
@@ -422,38 +390,37 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
                   <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
                   <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
                 </div>
-                <span class="text-[11px] font-semibold tracking-wider text-[#86948a] uppercase ml-2" style="font-family:'JetBrains Mono',monospace;">Explorer</span>
+                <span class="text-[11px] font-semibold tracking-wider text-[#86948a] uppercase ml-2"
+                  style="font-family:'JetBrains Mono',monospace;">Explorer</span>
               </div>
-              
+
               <!-- Folder Structure Design Toggle Button -->
-              <button 
-                @click="isFlatView = !isFlatView" 
+              <button @click="isFlatView = !isFlatView"
                 class="text-[#86948a] hover:text-[#4edea3] transition-colors p-1 cursor-pointer flex items-center gap-1 text-[10px] border border-[#3c4a42] px-2"
-                style="font-family:'JetBrains Mono',monospace;"
-                title="Toggle Tree / Flat Folder Structure"
-              >
-                <span class="material-symbols-outlined text-[14px]">{{ isFlatView ? 'account_tree' : 'format_list_bulleted' }}</span>
+                style="font-family:'JetBrains Mono',monospace;" title="Toggle Tree / Flat Folder Structure">
+                <span class="material-symbols-outlined text-[14px]">{{ isFlatView ? 'account_tree' :
+                  'format_list_bulleted' }}</span>
                 <span>{{ isFlatView ? 'Tree' : 'Flat' }}</span>
               </button>
             </div>
 
             <!-- Directory path indicator -->
-            <div class="px-4 py-2 text-[11px] font-semibold text-[#4edea3] bg-[#0b1326]/40 border-b border-[#3c4a42]/30" style="font-family:'JetBrains Mono',monospace;">
+            <div class="px-4 py-2 text-[11px] font-semibold text-[#4edea3] bg-[#0b1326]/40 border-b border-[#3c4a42]/30"
+              style="font-family:'JetBrains Mono',monospace;">
               /career/
             </div>
 
             <!-- Folder list -->
-            <div class="flex-grow overflow-y-auto p-2 space-y-1 select-none font-[JetBrains_Mono,monospace]" style="font-family:'JetBrains Mono',monospace; font-size: 13px;">
-              
+            <div class="flex-grow overflow-y-auto p-2 space-y-1 select-none font-[JetBrains_Mono,monospace]"
+              style="font-family:'JetBrains Mono',monospace; font-size: 13px;">
+
               <!-- TREE VIEW -->
               <template v-if="!isFlatView">
                 <div v-for="(folderData, folderKey) in experienceData" :key="folderKey" class="space-y-1">
                   <!-- Folders (Skip root_files representing parent files) -->
                   <template v-if="folderKey !== 'root_files'">
-                    <div 
-                      @click="toggleFolder(folderKey)"
-                      class="flex items-center gap-1.5 py-1 px-2 hover:bg-[#171f33]/40 text-[#dae2fd] cursor-pointer transition-colors rounded"
-                    >
+                    <div @click="toggleFolder(folderKey)"
+                      class="flex items-center gap-1.5 py-1 px-2 hover:bg-[#171f33]/40 text-[#dae2fd] cursor-pointer transition-colors rounded">
                       <span class="material-symbols-outlined text-[16px] text-[#86948a]">
                         {{ expandedFolders[folderKey] ? 'keyboard_arrow_down' : 'chevron_right' }}
                       </span>
@@ -465,17 +432,13 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
                     <!-- Indented files under folder -->
                     <div v-show="expandedFolders[folderKey]" class="pl-6 space-y-1">
-                      <div 
-                        v-for="(fileDetail, filename) in folderData.files" 
-                        :key="filename"
-                        @click="selectFile(folderKey, filename)"
-                        :class="[
+                      <div v-for="(_, filename) in folderData.files" :key="filename"
+                        @click="selectFile(folderKey, filename)" :class="[
                           'flex items-center gap-2 py-1 px-2 cursor-pointer transition-colors rounded border-l-2',
-                          selectedFolder === folderKey && selectedFile === filename 
-                            ? 'bg-[#171f33] border-[#4edea3] text-[#4edea3]' 
+                          selectedFolder === folderKey && selectedFile === filename
+                            ? 'bg-[#171f33] border-[#4edea3] text-[#4edea3]'
                             : 'border-transparent text-[#86948a] hover:text-[#dae2fd] hover:bg-[#171f33]/20'
-                        ]"
-                      >
+                        ]">
                         <span class="material-symbols-outlined text-[16px] text-sky-400">description</span>
                         <span class="truncate">{{ filename }}</span>
                       </div>
@@ -484,17 +447,13 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
                 </div>
 
                 <!-- Standalone/Root Files (like README.sh) -->
-                <div 
-                  v-for="(fileDetail, filename) in experienceData.root_files.files" 
-                  :key="filename"
-                  @click="selectFile('root_files', filename)"
-                  :class="[
+                <div v-for="(_, filename) in experienceData.root_files.files" :key="filename"
+                  @click="selectFile('root_files', filename)" :class="[
                     'flex items-center gap-2 py-1 px-2 cursor-pointer transition-colors rounded border-l-2 ml-4',
-                    selectedFolder === 'root_files' && selectedFile === filename 
-                      ? 'bg-[#171f33] border-[#4edea3] text-[#4edea3]' 
+                    selectedFolder === 'root_files' && selectedFile === filename
+                      ? 'bg-[#171f33] border-[#4edea3] text-[#4edea3]'
                       : 'border-transparent text-[#86948a] hover:text-[#dae2fd] hover:bg-[#171f33]/20'
-                  ]"
-                >
+                  ]">
                   <span class="material-symbols-outlined text-[16px] text-amber-500">terminal</span>
                   <span class="truncate">{{ filename }}</span>
                 </div>
@@ -502,22 +461,20 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
               <!-- FLAT VIEW -->
               <template v-else>
-                <div 
-                  v-for="item in flatFiles" 
-                  :key="item.folder + '/' + item.filename"
-                  @click="selectFile(item.folder, item.filename)"
-                  :class="[
+                <div v-for="item in flatFiles" :key="item.folder + '/' + item.filename"
+                  @click="selectFile(item.folder, item.filename)" :class="[
                     'flex items-center gap-2 py-1.5 px-2 cursor-pointer transition-colors rounded border-l-2',
-                    selectedFolder === item.folder && selectedFile === item.filename 
-                      ? 'bg-[#171f33] border-[#4edea3] text-[#4edea3]' 
+                    selectedFolder === item.folder && selectedFile === item.filename
+                      ? 'bg-[#171f33] border-[#4edea3] text-[#4edea3]'
                       : 'border-transparent text-[#86948a] hover:text-[#dae2fd] hover:bg-[#171f33]/20'
-                  ]"
-                >
-                  <span class="material-symbols-outlined text-[16px]" :class="item.folder === 'root_files' ? 'text-amber-500' : 'text-sky-400'">
+                  ]">
+                  <span class="material-symbols-outlined text-[16px]"
+                    :class="item.folder === 'root_files' ? 'text-amber-500' : 'text-sky-400'">
                     {{ item.folder === 'root_files' ? 'terminal' : 'description' }}
                   </span>
                   <span class="truncate text-[12px]">
-                    <span class="opacity-50" v-if="item.folder !== 'root_files'">{{ item.folder }}/</span>{{ item.filename }}
+                    <span class="opacity-50" v-if="item.folder !== 'root_files'">{{ item.folder }}/</span>{{
+                    item.filename }}
                   </span>
                 </div>
               </template>
@@ -528,13 +485,17 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
           <!-- Right Panel (File Editor/Viewer) -->
           <div class="lg:col-span-8 flex flex-col bg-[#0b1326]">
             <!-- Tab bar -->
-            <div class="flex bg-[#060e20]/80 border-b border-[#3c4a42] text-[12px]" style="font-family:'JetBrains Mono',monospace;">
-              <div class="flex items-center gap-2 px-4 py-2 bg-[#0b1326] border-t-2 border-[#4edea3] border-r border-[#3c4a42] text-[#dae2fd]">
-                <span class="material-symbols-outlined text-[16px]" :class="selectedFolder === 'root_files' ? 'text-amber-500' : 'text-sky-400'">
+            <div class="flex bg-[#060e20]/80 border-b border-[#3c4a42] text-[12px]"
+              style="font-family:'JetBrains Mono',monospace;">
+              <div
+                class="flex items-center gap-2 px-4 py-2 bg-[#0b1326] border-t-2 border-[#4edea3] border-r border-[#3c4a42] text-[#dae2fd]">
+                <span class="material-symbols-outlined text-[16px]"
+                  :class="selectedFolder === 'root_files' ? 'text-amber-500' : 'text-sky-400'">
                   {{ selectedFolder === 'root_files' ? 'terminal' : 'description' }}
                 </span>
                 <span>{{ selectedFile }}</span>
-                <span @click="selectFile('root_files', 'README.sh')" class="material-symbols-outlined text-[12px] hover:text-[#ff5f56] ml-2 cursor-pointer">close</span>
+                <span @click="selectFile('root_files', 'README.sh')"
+                  class="material-symbols-outlined text-[12px] hover:text-[#ff5f56] ml-2 cursor-pointer">close</span>
               </div>
             </div>
 
@@ -543,14 +504,16 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
               <!-- Document Title -->
               <div>
                 <h1 class="text-3xl font-bold tracking-tight text-[#dae2fd]"># {{ currentFileContent.title }}</h1>
-                <p class="text-[12px] text-[#86948a] mt-2 italic font-[JetBrains_Mono,monospace]" style="font-family:'JetBrains Mono',monospace;">
+                <p class="text-[12px] text-[#86948a] mt-2 italic font-[JetBrains_Mono,monospace]"
+                  style="font-family:'JetBrains Mono',monospace;">
                   // Period: {{ currentFileContent.period }} | Location: {{ currentFileContent.location }}
                 </p>
               </div>
 
               <!-- Role -->
               <div v-if="currentFileContent.role" class="pt-2">
-                <h2 class="text-lg font-semibold text-[#4edea3] font-[JetBrains_Mono,monospace]" style="font-family:'JetBrains Mono',monospace;">
+                <h2 class="text-lg font-semibold text-[#4edea3] font-[JetBrains_Mono,monospace]"
+                  style="font-family:'JetBrains Mono',monospace;">
                   ## ROLE: {{ currentFileContent.role }}
                 </h2>
                 <p class="text-sm text-[#86948a] leading-relaxed mt-2">
@@ -559,17 +522,18 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
               </div>
 
               <!-- Achievements -->
-              <div v-if="currentFileContent.achievements && currentFileContent.achievements.length > 0" class="space-y-3">
-                <h2 class="text-[13px] font-bold text-[#dae2fd] uppercase tracking-wider font-[JetBrains_Mono,monospace]" style="font-family:'JetBrains Mono',monospace;">
+              <div v-if="currentFileContent.achievements && currentFileContent.achievements.length > 0"
+                class="space-y-3">
+                <h2
+                  class="text-[13px] font-bold text-[#dae2fd] uppercase tracking-wider font-[JetBrains_Mono,monospace]"
+                  style="font-family:'JetBrains Mono',monospace;">
                   ## ACHIEVEMENTS
                 </h2>
                 <ul class="space-y-2">
-                  <li 
-                    v-for="(ach, i) in currentFileContent.achievements" 
-                    :key="i"
-                    class="text-sm text-[#dae2fd] leading-relaxed flex items-start gap-2"
-                  >
-                    <span class="text-[#4edea3] font-bold shrink-0 font-[JetBrains_Mono,monospace]" style="font-family:'JetBrains Mono',monospace;">
+                  <li v-for="(ach, i) in currentFileContent.achievements" :key="i"
+                    class="text-sm text-[#dae2fd] leading-relaxed flex items-start gap-2">
+                    <span class="text-[#4edea3] font-bold shrink-0 font-[JetBrains_Mono,monospace]"
+                      style="font-family:'JetBrains Mono',monospace;">
                       - {{ ach.type }}:
                     </span>
                     <span>{{ ach.desc }}</span>
@@ -578,17 +542,17 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
               </div>
 
               <!-- Tech Stack -->
-              <div v-if="currentFileContent.techStack && currentFileContent.techStack.length > 0" class="pt-4 border-t border-[#3c4a42]/30">
-                <h2 class="text-[13px] font-bold text-[#dae2fd] uppercase tracking-wider mb-3 font-[JetBrains_Mono,monospace]" style="font-family:'JetBrains Mono',monospace;">
+              <div v-if="currentFileContent.techStack && currentFileContent.techStack.length > 0"
+                class="pt-4 border-t border-[#3c4a42]/30">
+                <h2
+                  class="text-[13px] font-bold text-[#dae2fd] uppercase tracking-wider mb-3 font-[JetBrains_Mono,monospace]"
+                  style="font-family:'JetBrains Mono',monospace;">
                   ## TECH_STACK
                 </h2>
                 <div class="flex flex-wrap gap-2">
-                  <span 
-                    v-for="tech in currentFileContent.techStack" 
-                    :key="tech"
+                  <span v-for="tech in currentFileContent.techStack" :key="tech"
                     class="px-3 py-1 border border-[#3c4a42] text-[#86948a] text-[10px] tracking-wider font-semibold rounded hover:border-[#4edea3] hover:text-[#4edea3] transition-colors font-[JetBrains_Mono,monospace]"
-                    style="font-family:'JetBrains Mono',monospace;"
-                  >
+                    style="font-family:'JetBrains Mono',monospace;">
                     {{ tech }}
                   </span>
                 </div>
@@ -597,7 +561,9 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
             </div>
 
             <!-- Editor Footer / Status Bar -->
-            <div class="px-4 py-1.5 bg-[#060e20] border-t border-[#3c4a42] flex items-center justify-between text-[11px] text-[#86948a] font-[JetBrains_Mono,monospace]" style="font-family:'JetBrains Mono',monospace;">
+            <div
+              class="px-4 py-1.5 bg-[#060e20] border-t border-[#3c4a42] flex items-center justify-between text-[11px] text-[#86948a] font-[JetBrains_Mono,monospace]"
+              style="font-family:'JetBrains Mono',monospace;">
               <div>UTF-8 &nbsp;&nbsp; Line: 1, Col: 1</div>
               <div class="flex items-center gap-3">
                 <span class="flex items-center gap-1.5">
@@ -612,25 +578,28 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
         <!-- 2. TIMELINE VIEW -->
         <div v-else class="space-y-8 max-w-3xl mx-auto">
-          <div 
-            v-for="(folderData, folderKey) in experienceData" 
-            :key="folderKey"
-          >
+          <div v-for="(folderData, folderKey) in experienceData" :key="folderKey">
             <template v-if="folderKey !== 'root_files'">
-              <div v-for="(fileDetail, filename) in folderData.files" :key="filename" class="relative pl-8 pb-8 border-l border-[#3c4a42] last:pb-0">
+              <div v-for="(fileDetail, filename) in folderData.files" :key="filename"
+                class="relative pl-8 pb-8 border-l border-[#3c4a42] last:pb-0">
                 <!-- Timeline dot -->
-                <span class="absolute left-[-5px] top-1.5 w-[10px] h-[10px] rounded-full bg-[#10b981] border border-[#0b1326] shadow-glow"></span>
-                
+                <span
+                  class="absolute left-[-5px] top-1.5 w-[10px] h-[10px] rounded-full bg-[#10b981] border border-[#0b1326] shadow-glow"></span>
+
                 <!-- Content card -->
-                <div class="bg-[#171f33]/40 border border-[#3c4a42] p-6 hover:border-[#4edea3]/50 transition-all rounded">
+                <div
+                  class="bg-[#171f33]/40 border border-[#3c4a42] p-6 hover:border-[#4edea3]/50 transition-all rounded">
                   <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
                     <div>
                       <h3 class="text-xl font-bold text-[#dae2fd]">{{ fileDetail.title }}</h3>
-                      <p class="text-xs text-[#4edea3] font-semibold mt-1 font-[JetBrains_Mono,monospace]" style="font-family:'JetBrains Mono',monospace;">{{ fileDetail.role }}</p>
+                      <p class="text-xs text-[#4edea3] font-semibold mt-1 font-[JetBrains_Mono,monospace]"
+                        style="font-family:'JetBrains Mono',monospace;">{{ fileDetail.role }}</p>
                     </div>
                     <div class="text-right">
-                      <span class="text-[11px] text-[#86948a] font-[JetBrains_Mono,monospace]" style="font-family:'JetBrains Mono',monospace;">{{ fileDetail.period }}</span>
-                      <p class="text-[10px] text-[#86948a] opacity-60 font-[JetBrains_Mono,monospace]" style="font-family:'JetBrains Mono',monospace;">{{ fileDetail.location }}</p>
+                      <span class="text-[11px] text-[#86948a] font-[JetBrains_Mono,monospace]"
+                        style="font-family:'JetBrains Mono',monospace;">{{ fileDetail.period }}</span>
+                      <p class="text-[10px] text-[#86948a] opacity-60 font-[JetBrains_Mono,monospace]"
+                        style="font-family:'JetBrains Mono',monospace;">{{ fileDetail.location }}</p>
                     </div>
                   </div>
 
@@ -640,20 +609,19 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
                   <!-- Key Achievements list -->
                   <div class="space-y-2 mb-4">
-                    <div v-for="(ach, idx) in fileDetail.achievements" :key="idx" class="text-xs text-[#dae2fd] flex items-start gap-2">
-                      <span class="text-[#4edea3] font-bold font-[JetBrains_Mono,monospace]" style="font-family:'JetBrains Mono',monospace;">// {{ ach.type }}:</span>
+                    <div v-for="(ach, idx) in fileDetail.achievements" :key="idx"
+                      class="text-xs text-[#dae2fd] flex items-start gap-2">
+                      <span class="text-[#4edea3] font-bold font-[JetBrains_Mono,monospace]"
+                        style="font-family:'JetBrains Mono',monospace;">// {{ ach.type }}:</span>
                       <span>{{ ach.desc }}</span>
                     </div>
                   </div>
 
                   <!-- Tech stack -->
                   <div class="flex flex-wrap gap-1.5 pt-2">
-                    <span 
-                      v-for="tech in fileDetail.techStack" 
-                      :key="tech"
+                    <span v-for="tech in fileDetail.techStack" :key="tech"
                       class="px-2 py-0.5 border border-[#3c4a42]/60 text-[#86948a] text-[9px] font-semibold rounded font-[JetBrains_Mono,monospace]"
-                      style="font-family:'JetBrains Mono',monospace;"
-                    >
+                      style="font-family:'JetBrains Mono',monospace;">
                       {{ tech }}
                     </span>
                   </div>
