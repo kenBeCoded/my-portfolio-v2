@@ -70,3 +70,8 @@ body {
 .text-theme-on-surface-variant { color: var(--on-surface-variant); }
 .border-theme-outline { border-color: var(--outline); }
 .text-theme-primary { color: var(--primary-bright); }
+
+.font-mono-jb {
+  font-family: 'JetBrains Mono', monospace;
+}
+
