@@ -107,6 +107,11 @@ const contactLinks = [
 const showCopyNotification = ref(false)
 const copyNotificationText = ref('')
 
+// Lightbox
+const lightboxImage = ref<string | null>(null)
+function openLightbox(url: string) { lightboxImage.value = url }
+function closeLightbox() { lightboxImage.value = null }
+
 async function handleContactClick(c: typeof contactLinks[number], event: Event) {
   if (c.label.includes('Contact Number')) {
     event.preventDefault()
@@ -170,8 +175,9 @@ const lastActiveElement = ref<HTMLElement | null>(null)
 const mobileMenuContainer = ref<HTMLElement | null>(null)
 
 function handleKeyDown(e: KeyboardEvent) {
-  if (mobileMenuOpen.value && e.key === 'Escape') {
-    mobileMenuOpen.value = false
+  if (e.key === 'Escape') {
+    if (lightboxImage.value) { closeLightbox(); return }
+    if (mobileMenuOpen.value) mobileMenuOpen.value = false
   }
 }
 
@@ -698,14 +704,14 @@ onUnmounted(() => {
           <p class="text-[11px] font-semibold tracking-widest uppercase text-[#86948a] font-mono-jb">//
             SYNCING_DEPLOYMENT_REGISTRY...</p>
         </div>
-        <div v-else-if="projects.length === 0"
+        <div v-else-if="projects.filter(p => p.featured).length === 0"
           class="flex flex-col items-center justify-center py-16 border border-[#3c4a42]/30 bg-[#060e20]">
           <span class="material-symbols-outlined text-4xl text-[#86948a]/40 mb-4">info</span>
           <p class="text-[11px] font-semibold tracking-widest uppercase text-[#86948a] font-mono-jb">//
             NO_ACTIVE_DEPLOYMENTS_FOUND</p>
         </div>
         <div v-else class="flex flex-col gap-6">
-          <div v-for="p in projects" :key="p.id"
+          <div v-for="p in projects.filter(p => p.featured)" :key="p.id"
             class="group bg-[#060e20] border border-[#3c4a42] hover:border-[#4edea3] transition-all duration-300 flex flex-col md:flex-row overflow-hidden min-h-[200px]">
             <div class="flex-grow p-8 flex flex-col justify-between">
               <div class="flex flex-col gap-3">
@@ -753,9 +759,10 @@ onUnmounted(() => {
             </div>
             <!-- Project Image or Fallback Icon -->
             <div
-              class="w-full md:w-56 h-40 md:h-auto shrink-0 flex items-center justify-center bg-[#171f33] border-t md:border-t-0 md:border-l border-[#3c4a42] overflow-hidden">
+              class="w-full md:w-96 h-52 md:h-auto shrink-0 flex items-center justify-center bg-[#171f33] border-t md:border-t-0 md:border-l border-[#3c4a42] overflow-hidden">
               <img v-if="p.project_img_url" :src="p.project_img_url" :alt="p.title" loading="lazy"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 cursor-zoom-in"
+                @click.stop="openLightbox(p.project_img_url!)" />
               <span v-else
                 class="material-symbols-outlined text-[#4edea3]/30 text-6xl group-hover:text-[#4edea3]/60 group-hover:scale-110 transition-all duration-300">
                 {{ getFallbackIcon(p) }}
@@ -824,6 +831,25 @@ onUnmounted(() => {
         class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-[#171f33] border border-[#4edea3] px-6 py-3 text-sm font-mono-jb text-[#4edea3] flex items-center gap-2">
         <span class="material-symbols-outlined text-[18px]">check_circle</span>
         {{ copyNotificationText }}
+      </div>
+    </Transition>
+
+    <!-- Image Lightbox -->
+    <Transition enter-active-class="transition duration-200 ease-out"
+      enter-from-class="opacity-0" enter-to-class="opacity-100"
+      leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100"
+      leave-to-class="opacity-0">
+      <div v-if="lightboxImage"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out"
+        @click="closeLightbox">
+        <button @click.stop="closeLightbox"
+          class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
+          aria-label="Close image viewer">
+          <span class="material-symbols-outlined text-4xl">close</span>
+        </button>
+        <img :src="lightboxImage" alt="Project image preview"
+          class="max-w-full max-h-[90vh] object-contain shadow-2xl rounded"
+          @click.stop />
       </div>
     </Transition>
 
