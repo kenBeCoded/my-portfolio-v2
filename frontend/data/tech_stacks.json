@@ -1,0 +1,159 @@
+{
+  "data": [
+    {
+      "name": "javascript",
+      "category": "LANGUAGE",
+      "logo_url": "https://cdn-icons-png.flaticon.com/512/5968/5968292.png"
+    },
+    {
+      "name": "typescript",
+      "category": "LANGUAGE",
+      "logo_url": "https://cdn-icons-png.flaticon.com/512/5968/5968381.png"
+    },
+    {
+      "name": "python",
+      "category": "LANGUAGE",
+      "logo_url": "https://cdn-icons-png.flaticon.com/512/5968/5968350.png "
+    },
+    {
+      "name": "react",
+      "category": "FRONTEND",
+      "logo_url": "https://icon.icepanel.io/Technology/svg/React.svg"
+    },
+    {
+      "name": "node.js",
+      "category": "BACKEND",
+      "logo_url": "https://icon.icepanel.io/Technology/svg/Node.js.svg"
+    },
+    {
+      "name": "fastapi",
+      "category": "BACKEND",
+      "logo_url": "https://icon.icepanel.io/Technology/svg/FastAPI.svg"
+    },
+    {
+      "name": "express.js",
+      "category": "BACKEND",
+      "logo_url": "https://icon.icepanel.io/Technology/png-shadow-512/Express.png"
+    },
+    {
+      "name": "postgresql",
+      "category": "DATABASE",
+      "logo_url": "https://cdn-icons-png.flaticon.com/512/5968/5968342.png"
+    },
+    {
+      "name": "tailwind",
+      "category": "FRONTEND",
+      "logo_url": "https://icon.icepanel.io/Technology/svg/Tailwind-CSS.svg"
+    },
+    {
+      "name": "html",
+      "category": "FRONTEND",
+      "logo_url": "https://icon.icepanel.io/Technology/svg/HTML5.svg"
+    },
+    {
+      "name": "css",
+      "category": "FRONTEND",
+      "logo_url": "https://icon.icepanel.io/Technology/svg/CSS3.svg"
+    },
+    {
+      "name": "chatgpt",
+      "category": "AI",
+      "logo_url": "   https://cdn-icons-png.flaticon.com/512/11865/11865313.png "
+    },
+    {
+      "name": "claude",
+      "category": "AI",
+      "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/claude-ai.svg"
+    },
+    {
+      "name": "gemini",
+      "category": "AI",
+      "logo_url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/gemini-color.svg"
+    },
+    {
+      "name": "vite",
+      "category": "TOOL",
+      "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/vite.svg"
+    },
+    {
+      "name": "supabase",
+      "category": "TOOL",
+      "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/supabase.svg"
+    },
+    {
+      "name": "vercel",
+      "category": "TOOL",
+      "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/vercel.svg"
+    },
+    {
+      "name": "github",
+      "category": "TOOL",
+      "logo_url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/github.svg"
+    },
+    {
+      "name": "antigravity",
+      "category": "OTHER",
+      "logo_url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/antigravity-color.svg"
+    },
+    {
+      "name": "vscode",
+      "category": "OTHER",
+      "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/vscode.svg"
+    },
+    {
+      "name": "mongodb",
+      "category": "DATABASE",
+      "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/mongodb.svg"
+    },
+    {
+      "name": "mint",
+      "category": "OTHER",
+      "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/linux-mint.svg"
+    },
+    {
+      "name": "linux",
+      "category": "OTHER",
+      "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/linux.svg"
+    },
+    {
+      "name": "windows",
+      "category": "OTHER",
+      "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/windows-11.png"
+    },
+    {
+      "name": "npm",
+      "category": "TOOL",
+      "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/npm.svg"
+    },
+    {
+      "name": "ubuntu",
+      "category": "OTHER",
+      "logo_url": "https://cdn.jsdelivr.net/gh/selfhst/icons/svg/ubuntu.svg"
+    },
+    {
+      "name": "git",
+      "category": "TOOL",
+      "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/git.svg"
+    },
+    {
+      "name": "docker",
+      "category": "TOOL",
+      "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/docker.svg"
+    },
+    {
+      "name": "bruno",
+      "category": "TOOL",
+      "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/bruno.png"
+    },
+    {
+      "name": "vuejs",
+      "category": "FRONTEND",
+      "logo_url": "https://cdn.iconscout.com/icon/free/png-256/free-vue-icon-svg-download-png-282497.png?f=webp&w=256"
+    },
+    {
+      "name": "render",
+      "category": "OTHER",
+      "logo_url": "https://repository-images.githubusercontent.com/543813098/366e0eef-a3e8-4953-afc3-88c6e2ed954f"
+    }
+  ]
+}

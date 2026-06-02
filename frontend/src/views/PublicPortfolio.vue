@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
-import { fetchTechStacks, type TechStackOut } from '../services/techStackService'
-import { logVisit, getOrCreateVisitorId } from '../services/visitorService'
-import { fetchProjects, type ProjectOut } from '../services/projectService'
+import type { TechStackOut } from '../services/techStackService'
+import type { ProjectOut } from '../services/projectService'
 import { experienceData, type ExperienceDetail } from '../data/experienceData'
+import techStacksData from '../../data/tech_stacks.json'
+import projectsData from '../../data/projects.json'
 
 const activeSection = ref('home')
 const mobileMenuOpen = ref(false)
@@ -83,7 +84,7 @@ const techStack = computed(() => {
   const filterByCategory = (...catPrefixes: string[]) => {
     return apiTechStacks.value
       .filter(t => catPrefixes.some(prefix => t.category.toUpperCase().includes(prefix.toUpperCase())))
-      .sort((a, b) => a.sort_order - b.sort_order)
+      .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
   }
 
   return [
@@ -207,42 +208,28 @@ const computedLastUpdated = computed(() => {
   return `${year}.${month}.01`
 })
 
-onMounted(async () => {
+onMounted(() => {
   window.addEventListener('scroll', onScroll)
 
-  // ── Visitor tracking (once per browser session) ──────────────────────────
-  try {
-    if (!sessionStorage.getItem('portfolio_visited')) {
-      const visitorId = getOrCreateVisitorId()
-      await logVisit(visitorId, window.location.pathname, document.referrer)
-      sessionStorage.setItem('portfolio_visited', 'true')
-    }
-  } catch {
-    // Intentionally silent
-  }
-
-  // Concurrently load tech stacks and projects to optimize performance
+  // ── Tech stack data ───────────────────────────────────────────────────────
   isLoadingTechStacks.value = true
+  try {
+    apiTechStacks.value = techStacksData.data as TechStackOut[]
+  } catch (error) {
+    console.error('Failed to load tech stacks:', error)
+  } finally {
+    isLoadingTechStacks.value = false
+  }
+
+  // ── Projects data ─────────────────────────────────────────────────────────
   isLoadingProjects.value = true
-
-  const [techStacksRes, projectsRes] = await Promise.allSettled([
-    fetchTechStacks(),
-    fetchProjects()
-  ])
-
-  if (techStacksRes.status === 'fulfilled') {
-    apiTechStacks.value = techStacksRes.value
-  } else {
-    console.error('Failed to load tech stacks:', techStacksRes.reason)
+  try {
+    projects.value = projectsData.data as ProjectOut[]
+  } catch (error) {
+    console.error('Failed to load projects:', error)
+  } finally {
+    isLoadingProjects.value = false
   }
-  isLoadingTechStacks.value = false
-
-  if (projectsRes.status === 'fulfilled') {
-    projects.value = projectsRes.value
-  } else {
-    console.error('Failed to load projects:', projectsRes.reason)
-  }
-  isLoadingProjects.value = false
 
   // Sync theme status with index.html initialized state
   isDarkMode.value = !document.documentElement.classList.contains('light')

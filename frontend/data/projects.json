@@ -1,0 +1,113 @@
+{
+  "data": [
+    {
+      "title": "WhseMS — Warehouse Management System",
+      "description": "A full-stack, production-ready Warehouse Management System built for real operational workflows — from purchase order creation and supplier tracking, to bin-level inventory allocation, employee attendance monitoring, and live geolocation mapping of warehouse sites.",
+      "repo_url": "https://github.com/kenBeCoded/whse-mngt-system",
+      "live_url": "https://whse-mngt-system.vercel.app/",
+      "project_img_url": "https://pmgwsuuyhwtvlzltzjwq.supabase.co/storage/v1/object/public/App-File-Storage/documents/proj2.png",
+      "status": "done",
+      "featured": true,
+      "is_deleted": false,
+      "techstacks": [
+        {
+          "name": "javascript",
+          "category": "LANGUAGE",
+          "logo_url": "https://cdn-icons-png.flaticon.com/512/5968/5968292.png"
+        },
+        {
+          "name": "typescript",
+          "category": "LANGUAGE",
+          "logo_url": "https://cdn-icons-png.flaticon.com/512/5968/5968381.png"
+        },
+        {
+          "name": "react",
+          "category": "FRONTEND",
+          "logo_url": "https://icon.icepanel.io/Technology/svg/React.svg"
+        },
+        {
+          "name": "node.js",
+          "category": "BACKEND",
+          "logo_url": "https://icon.icepanel.io/Technology/svg/Node.js.svg"
+        },
+        {
+          "name": "express.js",
+          "category": "BACKEND",
+          "logo_url": "https://icon.icepanel.io/Technology/png-shadow-512/Express.png"
+        },
+        {
+          "name": "postgresql",
+          "category": "DATABASE",
+          "logo_url": "https://cdn-icons-png.flaticon.com/512/5968/5968342.png"
+        },
+        {
+          "name": "vite",
+          "category": "TOOL",
+          "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/vite.svg"
+        },
+        {
+          "name": "antigravity",
+          "category": "OTHER",
+          "logo_url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@latest/icons/antigravity-color.svg"
+        },
+        {
+          "name": "tailwind",
+          "category": "FRONTEND",
+          "logo_url": "https://icon.icepanel.io/Technology/svg/Tailwind-CSS.svg"
+        }
+      ]
+    },
+    {
+      "title": "SYSTOLINK: Enterprise-Grade IT Asset Management & Service Desk Suite",
+      "description": "SYSTOLINK is a comprehensive, full-stack IT Service Management (ITSM) and Asset Lifecycle tracking ecosystem. Built for modern organizations, it bridges the gap between hardware tracking and support ticketing, providing administrators, managers, and service desk agents a unified pane of glass to oversee hardware allocations, troubleshoot branch-level operational incidents, and monitor system performance via interactive dashboards.",
+      "repo_url": "https://github.com/kenBeCoded/ticketing-system-frontend",
+      "live_url": "https://ticketing-system-frontend-beta.vercel.app/",
+      "project_img_url": "https://pmgwsuuyhwtvlzltzjwq.supabase.co/storage/v1/object/public/App-File-Storage/documents/proj1.png",
+      "status": "done",
+      "featured": true,
+      "is_deleted": false,
+      "techstacks": [
+        {
+          "name": "javascript",
+          "category": "LANGUAGE",
+          "logo_url": "https://cdn-icons-png.flaticon.com/512/5968/5968292.png"
+        },
+        {
+          "name": "typescript",
+          "category": "LANGUAGE",
+          "logo_url": "https://cdn-icons-png.flaticon.com/512/5968/5968381.png"
+        },
+        {
+          "name": "react",
+          "category": "FRONTEND",
+          "logo_url": "https://icon.icepanel.io/Technology/svg/React.svg"
+        },
+        {
+          "name": "node.js",
+          "category": "BACKEND",
+          "logo_url": "https://icon.icepanel.io/Technology/svg/Node.js.svg"
+        },
+        {
+          "name": "express.js",
+          "category": "BACKEND",
+          "logo_url": "https://icon.icepanel.io/Technology/png-shadow-512/Express.png"
+        },
+        {
+          "name": "mongodb",
+          "category": "DATABASE",
+          "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/mongodb.svg"
+        },
+        {
+          "name": "vite",
+          "category": "TOOL",
+          "logo_url": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/vite.svg"
+        },
+        {
+          "name": "tailwind",
+          "category": "FRONTEND",
+          "logo_url": "https://icon.icepanel.io/Technology/svg/Tailwind-CSS.svg"
+        }
+      ]
+    }
+  ]
+}
